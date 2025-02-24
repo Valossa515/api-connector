@@ -36,7 +36,7 @@ API Connector é uma ferramenta para o VSCode que lhe permite testar endpoints. 
 
 Se você quiser contribuir para o desenvolvimento dessa extensão, siga estas etapas:
 
-1. **Fork** https://github.com/Valossa515/APIConnect.git
+1. **Fork** https://github.com/Valossa515/api-connector.git
 2. Crie uma nova branch para sua funcionalidade: `git checkout -b minha-nova-funcionalidade`.
 3. Faça suas mudanças e **commit**: `git commit -am 'Adiciona nova funcionalidade'`.
 4. **Push** para sua branch: `git push origin minha-nova-funcionalidade`.

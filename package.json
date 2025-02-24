@@ -50,6 +50,7 @@
   "dependencies": {
     "axios": "^1.7.9"
   },
+  "icon": "images/logo.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/Valossa515/api-connector.git"

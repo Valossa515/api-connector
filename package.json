@@ -1,6 +1,7 @@
 {
   "name": "api-connector",
   "displayName": "API Connector",
+  "publisher": "valossa515",
   "description": "Extension to connect to API very simple",
   "version": "0.0.1",
   "engines": {
@@ -48,5 +49,9 @@
   },
   "dependencies": {
     "axios": "^1.7.9"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Valossa515/api-connector.git"
   }
 }

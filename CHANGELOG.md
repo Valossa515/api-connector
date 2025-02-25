@@ -5,6 +5,10 @@ Todas as mudanças notáveis nesta extensão serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [0.0.5] - 2025-02-25
+### Adicionado
+- Suporte para variáveis de ambiente, agora é possivel criar, editar e excluir variáveis de ambiente personalizada
+
 ## [0.0.3] - 2025-02-25
 ### Adicionado
 - Suporte a autenticação Bearer, OAuth e Basic Auth.

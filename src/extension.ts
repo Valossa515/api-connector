@@ -7,18 +7,21 @@ class ApiPanel {
 
     panel: vscode.WebviewPanel;
     private requestHistory: Array<{ method: string, url: string, headers: any, body: string }> = [];
-
-    // 1) Armazena cabeçalhos de autenticação aqui
     private authHeaders: any = {};
+    private environmentVariables: Record<string, string> = {}; // Armazena variáveis de ambiente
 
-    constructor() {
+    constructor(private context: vscode.ExtensionContext) {
+        // Carrega variáveis de ambiente salvas
+        const savedVariables = this.context.globalState.get<Record<string, string>>('environmentVariables', {});
+        this.environmentVariables = savedVariables;
+
         this.panel = vscode.window.createWebviewPanel(
             ApiPanel.viewType,
             'API Connector',
             vscode.ViewColumn.One,
             {
                 enableScripts: true,
-                retainContextWhenHidden: true // Mantém o estado da Webview ao alternar entre abas
+                retainContextWhenHidden: true
             }
         );
 
@@ -26,11 +29,11 @@ class ApiPanel {
 
         this.panel.webview.onDidReceiveMessage(async (message: {
             command: string;
-            method: string;
-            url: string;
-            body: string;
-            headers: any;
-            params: string;
+            method?: string;
+            url?: string;
+            body?: string;
+            headers?: any;
+            params?: string;
             data?: any;
             format?: string;
             authType?: string;
@@ -38,22 +41,44 @@ class ApiPanel {
             clientId?: string;
             clientSecret?: string;
             index?: number;
+            variables?: Array<{ name: string, value: string }>;
         }) => {
-            if (message.command === 'fetchApi') {
-                this.fetchApiResponse(message.method, message.url, message.body, message.headers, message.params);
-            } else if (message.command === 'exportResponse') {
-                this.exportResponse(message.data, message.format || 'json');
-            } else if (message.command === 'loadRequest') {
-                if (message.index !== undefined) {
-                    this.loadRequestFromHistory(message.index);
-                }
-            } else if (message.command === 'setAuth') {
-                this.setAuthHeaders(
-                    message.authType || '',
-                    message.token || '',
-                    message.clientId || '',
-                    message.clientSecret || ''
-                );
+            switch (message.command) {
+                case 'fetchApi':
+                    if (message.method && message.url && message.headers && message.params !== undefined) {
+                        this.fetchApiResponse(message.method, message.url, message.body || '', message.headers, message.params);
+                    }
+                    break;
+                case 'exportResponse':
+                    if (message.data && message.format) {
+                        this.exportResponse(message.data, message.format);
+                    }
+                    break;
+                case 'loadRequest':
+                    if (message.index !== undefined) {
+                        this.loadRequestFromHistory(message.index);
+                    }
+                    break;
+                case 'setAuth':
+                    this.setAuthHeaders(
+                        message.authType || '',
+                        message.token || '',
+                        message.clientId || '',
+                        message.clientSecret || ''
+                    );
+                    break;
+                case 'saveEnvVariables':
+                    if (message.variables) {
+                        this.saveEnvironmentVariables(message.variables);
+                    }
+                    break;
+                case 'loadEnvVariables':
+                    // Envia as variáveis salvas para a Webview
+                    this.panel.webview.postMessage({
+                        command: 'loadEnvVariables',
+                        variables: Object.entries(this.environmentVariables).map(([name, value]) => ({ name, value }))
+                    });
+                    break;
             }
         });
 
@@ -62,22 +87,31 @@ class ApiPanel {
         });
     }
 
-    static show() {
+    static show(context: vscode.ExtensionContext) {
         if (ApiPanel.currentPanel) {
             ApiPanel.currentPanel.panel.reveal(vscode.ViewColumn.One);
         } else {
-            ApiPanel.currentPanel = new ApiPanel();
+            ApiPanel.currentPanel = new ApiPanel(context);
         }
     }
 
-    // 2) Merge dos cabeçalhos de autenticação com os cabeçalhos manuais
+    // Substitui variáveis de ambiente no URL, corpo e cabeçalhos
+    private replaceEnvVariables(input: string): string {
+        if (!input) return input;
+        return input.replace(/\{\{(.*?)\}\}/g, (match, p1) => this.environmentVariables[p1] || match);
+    }
+
     async fetchApiResponse(method: string, url: string, body: string, headers: any, params: string) {
         if (!url) {
             this.panel.webview.postMessage({ command: 'error', message: 'URL não pode estar vazia.' });
             return;
         }
 
-        if (!this.isValidUrl(url)) {
+        // Substitui variáveis de ambiente no URL
+        const fullUrl = this.replaceEnvVariables(url);
+
+        // Valida a URL após a substituição
+        if (!this.isValidUrl(fullUrl)) {
             this.panel.webview.postMessage({ command: 'error', message: 'URL inválida.' });
             return;
         }
@@ -93,21 +127,27 @@ class ApiPanel {
         }
 
         try {
-            let fullUrl = url;
+            // Substitui variáveis de ambiente no corpo e cabeçalhos
+            const fullBody = this.replaceEnvVariables(body);
+            const fullHeaders = Object.keys(headers).reduce((acc, key) => {
+                acc[key] = this.replaceEnvVariables(headers[key]);
+                return acc;
+            }, {} as Record<string, string>);
+
+            let finalUrl = fullUrl;
             if (params) {
-                fullUrl += '?' + params;
+                finalUrl += '?' + params;
             }
 
-            // IMPORTANTE: mescla os headers de autenticação com os digitados
             const mergedHeaders = {
                 ...this.authHeaders,
-                ...headers
+                ...fullHeaders
             };
 
             const options = {
                 method: method,
-                url: fullUrl,
-                data: body ? JSON.parse(body) : undefined,
+                url: finalUrl,
+                data: fullBody ? JSON.parse(fullBody) : undefined,
                 headers: mergedHeaders
             };
             const response = await axios(options);
@@ -118,11 +158,20 @@ class ApiPanel {
                 status: response.status
             });
 
-            // Salva a requisição no histórico
-            this.saveRequestToHistory(method, url, mergedHeaders, body);
+            this.saveRequestToHistory(method, fullUrl, mergedHeaders, fullBody);
         } catch (error: any) {
             this.panel.webview.postMessage({ command: 'error', message: error.message });
         }
+    }
+
+    // Salva variáveis de ambiente
+    private saveEnvironmentVariables(variables: Array<{ name: string, value: string }>) {
+        this.environmentVariables = {};
+        variables.forEach(variable => {
+            this.environmentVariables[variable.name] = variable.value;
+        });
+        this.context.globalState.update('environmentVariables', this.environmentVariables);
+        this.panel.webview.postMessage({ command: 'loadEnvVariables', variables });
     }
 
     isValidUrl(url: string): boolean {
@@ -199,7 +248,6 @@ class ApiPanel {
     }
 
     convertJsonToXml(json: any): string {
-        // Implementação simples de conversão de JSON para XML
         let xml = '';
         for (const key in json) {
             if (json.hasOwnProperty(key)) {
@@ -209,7 +257,6 @@ class ApiPanel {
         return xml;
     }
 
-    // 3) Armazena o token/cabeçalhos de autenticação aqui
     setAuthHeaders(
         authType: string = '',
         token: string = '',
@@ -235,10 +282,7 @@ class ApiPanel {
                 break;
         }
 
-        // Guarda no atributo da classe, para uso posterior em fetchApiResponse
         this.authHeaders = headers;
-
-        // (Opcional) Se quiser notificar o front-end sobre esses headers:
         this.panel.webview.postMessage({ command: 'setAuthHeaders', headers });
     }
 
@@ -266,7 +310,7 @@ class ApiPanel {
                         display: flex;
                         gap: 20px;
                     }
-                    .request-section, .response-section, .auth-section {
+                    .request-section, .response-section, .auth-section, .env-section {
                         flex: 1;
                         background: #fff;
                         padding: 20px;
@@ -340,7 +384,7 @@ class ApiPanel {
                         background-color: #1e1e1e;
                         color: #e0e0e0;
                     }
-                    .theme-dark .request-section, .theme-dark .response-section, .theme-dark .auth-section {
+                    .theme-dark .request-section, .theme-dark .response-section, .theme-dark .auth-section, .theme-dark .env-section {
                         background: #2d2d2d;
                         color: #e0e0e0;
                     }
@@ -427,6 +471,15 @@ class ApiPanel {
 
                         <button onclick="setAuth()">Aplicar Autenticação</button>
                     </div>
+
+                    <div class="env-section">
+                        <h3>Variáveis de Ambiente</h3>
+                        <div id="envVariables">
+                            <!-- As variáveis serão carregadas aqui -->
+                        </div>
+                        <button onclick="addEnvVariable()">Adicionar Variável</button>
+                        <button onclick="saveEnvVariables()">Salvar Variáveis</button>
+                    </div>
                 </div>
 
                 <div class="history-section">
@@ -502,6 +555,43 @@ class ApiPanel {
                         });
                     }
 
+                    function addEnvVariable(name = '', value = '') {
+                        const envVariables = document.getElementById('envVariables');
+                        const div = document.createElement('div');
+                        div.className = 'env-variable';
+                        div.innerHTML = \`
+                            <input type="text" placeholder="Nome" class="env-name" value="\${name}" />
+                            <input type="text" placeholder="Valor" class="env-value" value="\${value}" />
+                            <button class="delete-env-btn" onclick="deleteEnvVariable(this)">Excluir</button>
+                        \`;
+                        envVariables.appendChild(div);
+                    }
+
+                    function deleteEnvVariable(button) {
+                        const envVariableDiv = button.parentElement;
+                        envVariableDiv.remove();
+                    }
+
+                    function loadEnvVariables(variables) {
+                        const envVariables = document.getElementById('envVariables');
+                        envVariables.innerHTML = ''; // Limpa a lista atual
+                        variables.forEach(variable => {
+                            addEnvVariable(variable.name, variable.value);
+                        });
+                    }
+
+                    function saveEnvVariables() {
+                        const envVariables = [];
+                        document.querySelectorAll('.env-variable').forEach(div => {
+                            const name = div.querySelector('.env-name').value;
+                            const value = div.querySelector('.env-value').value;
+                            if (name && value) {
+                                envVariables.push({ name, value });
+                            }
+                        });
+                        vscode.postMessage({ command: 'saveEnvVariables', variables: envVariables });
+                    }
+
                     window.addEventListener('message', event => {
                         const message = event.data;
                         if (message.command === 'response') {
@@ -524,11 +614,13 @@ class ApiPanel {
                             document.getElementById('url').value = message.request.url;
                             document.getElementById('body').value = message.request.body;
                             // Se quiser, aqui você pode recarregar os cabeçalhos do histórico
-                        } else if (message.command === 'setAuthHeaders') {
-                            // Opcional: implementar a aplicação/visualização desses headers na UI
-                            // Exemplo: injetar inputs com 'Authorization' etc.
+                        } else if (message.command === 'loadEnvVariables') {
+                            loadEnvVariables(message.variables);
                         }
                     });
+
+                    // Solicita as variáveis salvas ao carregar a interface
+                    vscode.postMessage({ command: 'loadEnvVariables' });
                 </script>
             </body>
             </html>`;
@@ -537,7 +629,7 @@ class ApiPanel {
 
 function activate(context: vscode.ExtensionContext) {
     let panelCommand = vscode.commands.registerCommand('apiConnector.openPanel', () => {
-        ApiPanel.show();
+        ApiPanel.show(context);
     });
     context.subscriptions.push(panelCommand);
 }

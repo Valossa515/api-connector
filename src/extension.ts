@@ -25,7 +25,7 @@ class ApiPanel {
                 enableScripts: true,
                 retainContextWhenHidden: true,
                 localResourceRoots: [
-                    vscode.Uri.file(path.join(this.context.extensionPath, 'src', 'webview'))
+                    vscode.Uri.file(path.join(this.context.extensionPath, 'src'))
                 ]
             }
         );
@@ -297,20 +297,22 @@ class ApiPanel {
         this.panel.webview.postMessage({ command: 'setAuthHeaders', headers });
     }
 
-    // Carrega o conteúdo HTML da interface
     private _getHtml(): string {
-        const htmlPath = path.join(this.context.extensionPath, 'src', 'webview', 'index.html');
-        const cssPath = this.panel.webview.asWebviewUri(
-            vscode.Uri.file(path.join(this.context.extensionPath, 'src', 'webview', 'styles.css'))
-        ).toString();
-        const jsPath = this.panel.webview.asWebviewUri(
-            vscode.Uri.file(path.join(this.context.extensionPath, 'src', 'webview', 'script.js'))
-        ).toString();
-
-        let htmlContent = fs.readFileSync(htmlPath, 'utf8');
-        htmlContent = htmlContent.replace('{{styles}}', cssPath).replace('{{script}}', jsPath);
-
-        return htmlContent;
+        const htmlPath = path.join(this.context.extensionPath, 'src', 'index.html');
+        const htmlContent = fs.readFileSync(htmlPath, 'utf8');
+    
+        const cssUri = this.panel.webview.asWebviewUri(
+            vscode.Uri.file(path.join(this.context.extensionPath, 'src', 'styles.css'))
+        );
+        const jsUri = this.panel.webview.asWebviewUri(
+            vscode.Uri.file(path.join(this.context.extensionPath, 'src', 'script.js'))
+        );
+    
+        // Substituir as variáveis {{styles}} e {{script}} com as URLs corretas
+        let finalHtmlContent = htmlContent.replace('{{styles}}', cssUri.toString())
+            .replace('{{script}}', jsUri.toString());
+    
+        return finalHtmlContent;
     }
 }
 

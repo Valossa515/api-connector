@@ -59,7 +59,7 @@
   "files": [
     "logo.png",
     "README.md",
-    "src/webview/**/*",
+    "src/**/*",
     "dist/**/*"
   ]
 }

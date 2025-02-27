@@ -1,4 +1,6 @@
 const esbuild = require('esbuild');
+const path = require('path');
+const fs = require('fs-extra');
 
 const production = process.argv.includes('--production');
 const watch = process.argv.includes('--watch');
@@ -28,7 +30,7 @@ async function main() {
     sourcemap: !production,
     sourcesContent: false,
     platform: 'node',
-    outfile: 'dist/extension.js',
+    outfile: 'dist/extension.js', 
     external: ['vscode'],
     logLevel: 'silent',
     plugins: [

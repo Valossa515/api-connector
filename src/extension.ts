@@ -1,16 +1,18 @@
 import * as vscode from 'vscode';
-const axios = require('axios');
+import * as path from 'path';
+import * as fs from 'fs';
+import axios from 'axios';
 
 class ApiPanel {
-    public static currentPanel: ApiPanel | undefined = undefined;
+    private static currentPanel: ApiPanel | undefined = undefined;
     static readonly viewType = 'apiConnectorPanel';
 
     panel: vscode.WebviewPanel;
-    private requestHistory: Array<{ method: string, url: string, headers: any, body: string }> = [];
+    private readonly requestHistory: Array<{ method: string, url: string, headers: any, body: string }> = [];
     private authHeaders: any = {};
     private environmentVariables: Record<string, string> = {}; // Armazena variáveis de ambiente
 
-    constructor(private context: vscode.ExtensionContext) {
+    constructor(private readonly context: vscode.ExtensionContext) {
         // Carrega variáveis de ambiente salvas
         const savedVariables = this.context.globalState.get<Record<string, string>>('environmentVariables', {});
         this.environmentVariables = savedVariables;
@@ -21,10 +23,14 @@ class ApiPanel {
             vscode.ViewColumn.One,
             {
                 enableScripts: true,
-                retainContextWhenHidden: true
+                retainContextWhenHidden: true,
+                localResourceRoots: [
+                    vscode.Uri.file(path.join(this.context.extensionPath, 'src', 'webview'))
+                ]
             }
         );
 
+        // Carrega o conteúdo HTML da interface
         this.panel.webview.html = this._getHtml();
 
         this.panel.webview.onDidReceiveMessage(async (message: {
@@ -46,7 +52,7 @@ class ApiPanel {
             switch (message.command) {
                 case 'fetchApi':
                     if (message.method && message.url && message.headers && message.params !== undefined) {
-                        this.fetchApiResponse(message.method, message.url, message.body || '', message.headers, message.params);
+                        this.fetchApiResponse(message.method, message.url, message.body ?? '', message.headers, message.params);
                     }
                     break;
                 case 'exportResponse':
@@ -61,10 +67,10 @@ class ApiPanel {
                     break;
                 case 'setAuth':
                     this.setAuthHeaders(
-                        message.authType || '',
-                        message.token || '',
-                        message.clientId || '',
-                        message.clientSecret || ''
+                        message.authType ?? '',
+                        message.token ?? '',
+                        message.clientId ?? '',
+                        message.clientSecret ?? ''
                     );
                     break;
                 case 'saveEnvVariables':
@@ -97,7 +103,9 @@ class ApiPanel {
 
     // Substitui variáveis de ambiente no URL, corpo e cabeçalhos
     private replaceEnvVariables(input: string): string {
-        if (!input) return input;
+        if (!input) {
+            return input;
+        }
         return input.replace(/\{\{(.*?)\}\}/g, (match, p1) => this.environmentVariables[p1] || match);
     }
 
@@ -276,9 +284,12 @@ class ApiPanel {
                 };
                 break;
             case 'Basic':
-                headers = {
-                    Authorization: `Basic ${Buffer.from(`${clientId}:${clientSecret}`).toString('base64')}`
-                };
+                {
+                    const encodedCredentials = Buffer.from(clientId + ':' + clientSecret).toString('base64');
+                    headers = {
+                        Authorization: `Basic ${encodedCredentials}`
+                    };
+                }
                 break;
         }
 
@@ -286,344 +297,20 @@ class ApiPanel {
         this.panel.webview.postMessage({ command: 'setAuthHeaders', headers });
     }
 
-    _getHtml() {
-        return `
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>API Connector</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        margin: 0;
-                        padding: 20px;
-                        background-color: #f9f9f9;
-                        color: #333;
-                    }
-                    h2 {
-                        color: #4CAF50;
-                        margin-bottom: 20px;
-                    }
-                    .container {
-                        display: flex;
-                        gap: 20px;
-                    }
-                    .request-section, .response-section, .auth-section, .env-section {
-                        flex: 1;
-                        background: #fff;
-                        padding: 20px;
-                        border-radius: 8px;
-                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                    }
-                    label {
-                        display: block;
-                        font-weight: bold;
-                        margin-bottom: 8px;
-                    }
-                    input, select, textarea {
-                        width: 100%;
-                        padding: 10px;
-                        margin-bottom: 15px;
-                        border: 1px solid #ddd;
-                        border-radius: 4px;
-                        font-size: 14px;
-                    }
-                    textarea {
-                        height: 100px;
-                        resize: vertical;
-                    }
-                    button {
-                        background-color: #4CAF50;
-                        color: white;
-                        padding: 10px 15px;
-                        border: none;
-                        border-radius: 4px;
-                        cursor: pointer;
-                        font-size: 14px;
-                        margin-right: 10px;
-                    }
-                    button:hover {
-                        background-color: #45a049;
-                    }
-                    .add-header-btn {
-                        background-color: #008CBA;
-                    }
-                    .add-header-btn:hover {
-                        background-color: #005f73;
-                    }
-                    .export-btn {
-                        background-color: #f44336;
-                    }
-                    .export-btn:hover {
-                        background-color: #d32f2f;
-                    }
-                    pre {
-                        background-color: #2d2d2d;
-                        color: #e0e0e0;
-                        padding: 15px;
-                        border-radius: 4px;
-                        white-space: pre-wrap;
-                        word-wrap: break-word;
-                        max-height: 300px;
-                        overflow-y: auto;
-                    }
-                    .loading {
-                        display: none;
-                        color: #4CAF50;
-                        font-weight: bold;
-                        margin-bottom: 15px;
-                    }
-                    .error {
-                        color: #f44336;
-                        font-weight: bold;
-                        margin-bottom: 15px;
-                    }
-                    .theme-dark {
-                        background-color: #1e1e1e;
-                        color: #e0e0e0;
-                    }
-                    .theme-dark .request-section, .theme-dark .response-section, .theme-dark .auth-section, .theme-dark .env-section {
-                        background: #2d2d2d;
-                        color: #e0e0e0;
-                    }
-                    .theme-dark pre {
-                        background-color: #1e1e1e;
-                        color: #e0e0e0;
-                    }
-                </style>
-            </head>
-            <body>
-                <h2>API Connector</h2>
-                <div class="container">
-                    <div class="request-section">
-                        <label for="method">Método:</label>
-                        <select id="method">
-                            <option value="GET">GET</option>
-                            <option value="POST">POST</option>
-                            <option value="PUT">PUT</option>
-                            <option value="DELETE">DELETE</option>
-                            <option value="PATCH">PATCH</option>
-                            <option value="OPTIONS">OPTIONS</option>
-                        </select>
-                        
-                        <label for="url">URL da API:</label>
-                        <input id="url" type="text" placeholder="Digite a URL da API" />
+    // Carrega o conteúdo HTML da interface
+    private _getHtml(): string {
+        const htmlPath = path.join(this.context.extensionPath, 'src', 'webview', 'index.html');
+        const cssPath = this.panel.webview.asWebviewUri(
+            vscode.Uri.file(path.join(this.context.extensionPath, 'src', 'webview', 'styles.css'))
+        ).toString();
+        const jsPath = this.panel.webview.asWebviewUri(
+            vscode.Uri.file(path.join(this.context.extensionPath, 'src', 'webview', 'script.js'))
+        ).toString();
 
-                        <label for="params">Parâmetros (ex: param1=value1&ampparam2=value2):</label>
-                        <input id="params" type="text" placeholder="Digite os parâmetros" />
-                        
-                        <label for="body">Corpo da requisição (JSON):</label>
-                        <textarea id="body" placeholder="Corpo da requisição (JSON)"></textarea>
+        let htmlContent = fs.readFileSync(htmlPath, 'utf8');
+        htmlContent = htmlContent.replace('{{styles}}', cssPath).replace('{{script}}', jsPath);
 
-                        <div class="header-inputs" id="headerInputs">
-                            <label for="header-name-1">Cabeçalho (Chave) (Opcional caso use a sessão Autenticação):</label>
-                            <input id="header-name-1" type="text" placeholder="Digite o nome do cabeçalho" />
-                            <label for="header-value-1">Cabeçalho (Valor) (Opcional caso use a sessão Autenticação):</label>
-                            <input id="header-value-1" type="text" placeholder="Digite o valor do cabeçalho" />
-                        </div>
-
-                        <button class="add-header-btn" onclick="addHeader()">Adicionar Cabeçalho</button>
-                        <button onclick="sendRequest()">Enviar</button>
-                        <div id="loading" class="loading">Carregando...</div>
-                        <div id="error" class="error"></div>
-                    </div>
-
-                    <div class="response-section">
-                        <label>Resposta:</label>
-                        <pre id="response"></pre>
-                        <select id="exportFormat">
-                            <option value="json">JSON</option>
-                            <option value="xml">XML</option>
-                        </select>
-                        <button class="export-btn" onclick="exportResponse()">Exportar Resposta</button>
-                    </div>
-
-                    <div class="auth-section">
-                        <h3>Autenticação</h3>
-                        <label for="authType">Tipo de Autenticação:</label>
-                        <select id="authType">
-                            <option value="None">Nenhuma</option>
-                            <option value="Bearer">Bearer Token</option>
-                            <option value="OAuth">OAuth</option>
-                            <option value="Basic">Basic Auth</option>
-                        </select>
-
-                        <div id="authFields">
-                            <div id="bearerFields" class="auth-fields">
-                                <label for="bearerToken">Token:</label>
-                                <input id="bearerToken" type="text" placeholder="Digite o token" />
-                            </div>
-                            <div id="oauthFields" class="auth-fields">
-                                <label for="clientId">Client ID:</label>
-                                <input id="clientId" type="text" placeholder="Digite o Client ID" />
-                                <label for="clientSecret">Client Secret:</label>
-                                <input id="clientSecret" type="text" placeholder="Digite o Client Secret" />
-                            </div>
-                            <div id="basicFields" class="auth-fields">
-                                <label for="basicUser">Usuário:</label>
-                                <input id="basicUser" type="text" placeholder="Digite o usuário" />
-                                <label for="basicPassword">Senha:</label>
-                                <input id="basicPassword" type="password" placeholder="Digite a senha" />
-                            </div>
-                        </div>
-
-                        <button onclick="setAuth()">Aplicar Autenticação</button>
-                    </div>
-
-                    <div class="env-section">
-                        <h3>Variáveis de Ambiente</h3>
-                        <div id="envVariables">
-                            <!-- As variáveis serão carregadas aqui -->
-                        </div>
-                        <button onclick="addEnvVariable()">Adicionar Variável</button>
-                        <button onclick="saveEnvVariables()">Salvar Variáveis</button>
-                    </div>
-                </div>
-
-                <div class="history-section">
-                    <h3>Histórico de Requisições</h3>
-                    <ul id="historyList"></ul>
-                </div>
-
-                <script>
-                    const vscode = acquireVsCodeApi();
-                    let headerCount = 1;
-
-                    function addHeader() {
-                        headerCount++;
-                        const headerInputs = document.getElementById('headerInputs');
-                        const headerDiv = document.createElement('div');
-                        headerDiv.innerHTML = \`
-                            <label for="header-name-\${headerCount}">Cabeçalho (Chave):</label>
-                            <input id="header-name-\${headerCount}" type="text" placeholder="Digite o nome do cabeçalho" />
-                            <label for="header-value-\${headerCount}">Cabeçalho (Valor):</label>
-                            <input id="header-value-\${headerCount}" type="text" placeholder="Digite o valor do cabeçalho" />
-                        \`;
-                        headerInputs.appendChild(headerDiv);
-                    }
-
-                    function sendRequest() {
-                        const method = document.getElementById('method').value;
-                        const url = document.getElementById('url').value;
-                        const params = document.getElementById('params').value;
-                        const body = document.getElementById('body').value;
-
-                        const headers = {};
-                        for (let i = 1; i <= headerCount; i++) {
-                            const headerName = document.getElementById('header-name-' + i)?.value;
-                            const headerValue = document.getElementById('header-value-' + i)?.value;
-                            if (headerName && headerValue) {
-                                headers[headerName] = headerValue;
-                            }
-                        }
-
-                        document.getElementById('loading').style.display = 'block';
-                        document.getElementById('error').textContent = '';
-                        vscode.postMessage({
-                            command: 'fetchApi',
-                            method,
-                            url,
-                            body,
-                            headers,
-                            params
-                        });
-                    }
-
-                    function exportResponse() {
-                        const response = document.getElementById('response').textContent;
-                        const format = document.getElementById('exportFormat').value;
-                        vscode.postMessage({ command: 'exportResponse', data: response, format });
-                    }
-
-                    function loadRequest(index) {
-                        vscode.postMessage({ command: 'loadRequest', index });
-                    }
-
-                    function setAuth() {
-                        const authType = document.getElementById('authType').value;
-                        const token = document.getElementById('bearerToken')?.value;
-                        const clientId = document.getElementById('clientId')?.value;
-                        const clientSecret = document.getElementById('clientSecret')?.value;
-                        vscode.postMessage({
-                            command: 'setAuth',
-                            authType,
-                            token,
-                            clientId,
-                            clientSecret
-                        });
-                    }
-
-                    function addEnvVariable(name = '', value = '') {
-                        const envVariables = document.getElementById('envVariables');
-                        const div = document.createElement('div');
-                        div.className = 'env-variable';
-                        div.innerHTML = \`
-                            <input type="text" placeholder="Nome" class="env-name" value="\${name}" />
-                            <input type="text" placeholder="Valor" class="env-value" value="\${value}" />
-                            <button class="delete-env-btn" onclick="deleteEnvVariable(this)">Excluir</button>
-                        \`;
-                        envVariables.appendChild(div);
-                    }
-
-                    function deleteEnvVariable(button) {
-                        const envVariableDiv = button.parentElement;
-                        envVariableDiv.remove();
-                    }
-
-                    function loadEnvVariables(variables) {
-                        const envVariables = document.getElementById('envVariables');
-                        envVariables.innerHTML = ''; // Limpa a lista atual
-                        variables.forEach(variable => {
-                            addEnvVariable(variable.name, variable.value);
-                        });
-                    }
-
-                    function saveEnvVariables() {
-                        const envVariables = [];
-                        document.querySelectorAll('.env-variable').forEach(div => {
-                            const name = div.querySelector('.env-name').value;
-                            const value = div.querySelector('.env-value').value;
-                            if (name && value) {
-                                envVariables.push({ name, value });
-                            }
-                        });
-                        vscode.postMessage({ command: 'saveEnvVariables', variables: envVariables });
-                    }
-
-                    window.addEventListener('message', event => {
-                        const message = event.data;
-                        if (message.command === 'response') {
-                            document.getElementById('loading').style.display = 'none';
-                            document.getElementById('response').textContent = \`Status: \${message.status}\n\${JSON.stringify(message.data, null, 2)}\`;
-                        } else if (message.command === 'error') {
-                            document.getElementById('loading').style.display = 'none';
-                            document.getElementById('error').textContent = 'Erro: ' + message.message;
-                        } else if (message.command === 'updateHistory') {
-                            const historyList = document.getElementById('historyList');
-                            historyList.innerHTML = '';
-                            message.history.forEach((request, index) => {
-                                const li = document.createElement('li');
-                                li.textContent = \`\${request.method} \${request.url}\`;
-                                li.onclick = () => loadRequest(index);
-                                historyList.appendChild(li);
-                            });
-                        } else if (message.command === 'loadRequest') {
-                            document.getElementById('method').value = message.request.method;
-                            document.getElementById('url').value = message.request.url;
-                            document.getElementById('body').value = message.request.body;
-                            // Se quiser, aqui você pode recarregar os cabeçalhos do histórico
-                        } else if (message.command === 'loadEnvVariables') {
-                            loadEnvVariables(message.variables);
-                        }
-                    });
-
-                    // Solicita as variáveis salvas ao carregar a interface
-                    vscode.postMessage({ command: 'loadEnvVariables' });
-                </script>
-            </body>
-            </html>`;
+        return htmlContent;
     }
 }
 
@@ -634,7 +321,10 @@ function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(panelCommand);
 }
 
-function deactivate() {}
+
+function deactivate() {
+    // This method is called when your extension is deactivated
+}
 
 module.exports = {
     activate,

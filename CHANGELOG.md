@@ -1,62 +1,66 @@
 # Changelog
 
-Todas as mudanças notáveis nesta extensão serão documentadas neste arquivo.
+All notable changes to this extension will be documented in this file.
 
-O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
-e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/).
+
+## [0.1.6] - 2025-02-27
+### Added
+- Internationalization.
 
 ## [0.1.5] - 2025-02-27
-### Adicionado
-- Carregamento automatico de historico e eclusão de historico de requisição.
+### Added
+- Automatic loading of history and clearing of request history.
 
 ## [0.1.4] - 2025-02-27
-### Adicionado
-- Notificações para avisar o usuário ao clicar nos botões
-- Paineis retrateis
-- Novos estilos css para variaveis de ambiente e coloração dos brackets {} para destacar variaveis de ambiente.
+### Added
+- Notifications to alert the user when clicking buttons
+- Collapsible panels
+- New CSS styles for environment variables and coloring of brackets `{}` to highlight environment variables.
 
-### Corrigido
-- Processo de exclusão de uma variavel de ambiente.
+### Fixed
+- Process for deleting an environment variable.
 
-### Alterado
-- Layout do projeto foi alterado para melhorar o entendimento e separar responsabilidades.
+### Changed
+- Project layout was changed to improve understanding and separate responsibilities.
 
 ## [0.0.5] - 2025-02-25
-### Adicionado
-- Suporte para variáveis de ambiente, agora é possivel criar, editar e excluir variáveis de ambiente personalizada
+### Added
+- Support for environment variables, now you can create, edit, and delete custom environment variables.
 
 ## [0.0.3] - 2025-02-25
-### Adicionado
-- Suporte a autenticação Bearer, OAuth e Basic Auth.
-- Aba dedicada para gerenciamento de cabeçalhos.
-- Funcionalidade de exportação de respostas em formato XML.
-- Validação automática de JSON no corpo da requisição.
+### Added
+- Support for Bearer, OAuth, and Basic Auth authentication.
+- Dedicated tab for header management.
+- Export response functionality in XML format.
+- Automatic JSON validation in the request body.
 
-### Corrigido
-- Erro 401 ao enviar requisições sem cabeçalhos manuais.
-- Problema na validação de URLs inválidas.
-- Corrigido o carregamento de requisições salvas no histórico.
+### Fixed
+- 401 error when sending requests without manual headers.
+- Issue with invalid URL validation.
+- Fixed loading of saved requests in history.
 
-### Alterado
-- Melhoria na interface do usuário para melhor usabilidade.
-- Cabeçalhos padrão (`Content-Type: application/json` e `Accept: application/json`) são adicionados automaticamente.
+### Changed
+- Improved user interface for better usability.
+- Default headers (`Content-Type: application/json` and `Accept: application/json`) are added automatically.
 
 ## [0.0.2] - 2025-02-24
-### Adicionado
-- Funcionalidade de histórico de requisições.
-- Suporte a métodos HTTP adicionais (PATCH e OPTIONS).
-- Validação de cabeçalhos para garantir que sejam válidos.
-- Notificações de erro mais descritivas.
+### Added
+- Request history functionality.
+- Support for additional HTTP methods (PATCH and OPTIONS).
+- Header validation to ensure they are valid.
+- More descriptive error notifications.
 
-### Corrigido
-- Problema na exportação de respostas em formato JSON.
-- Erro ao enviar requisições com corpo vazio.
+### Fixed
+- Issue with exporting responses in JSON format.
+- Error when sending requests with an empty body.
 
-### Alterado
-- Melhoria na organização do código para facilitar manutenção.
+### Changed
+- Improved code organization for easier maintenance.
 
 ## [0.0.1] - 2025-02-24
-### Adicionado
-- Funcionalidade básica de envio de requisições HTTP (GET, POST, PUT, DELETE).
-- Exportação de respostas em formato JSON.
-- Interface inicial do usuário com campos para URL, método, parâmetros, corpo e cabeçalhos.
+### Added
+- Basic functionality for sending HTTP requests (GET, POST, PUT, DELETE).
+- Export responses in JSON format.
+- Initial user interface with fields for URL, method, parameters, body, and headers.

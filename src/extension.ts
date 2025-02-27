@@ -8,14 +8,18 @@ class ApiPanel {
     static readonly viewType = 'apiConnectorPanel';
 
     panel: vscode.WebviewPanel;
-    private readonly requestHistory: Array<{ method: string, url: string, headers: any, body: string }> = [];
+    private requestHistory: Array<{ method: string, url: string, headers: any, body: string }> = [];
     private authHeaders: any = {};
     private environmentVariables: Record<string, string> = {}; // Armazena variáveis de ambiente
 
     constructor(private readonly context: vscode.ExtensionContext) {
         // Carrega variáveis de ambiente salvas
         const savedVariables = this.context.globalState.get<Record<string, string>>('environmentVariables', {});
-        this.environmentVariables = savedVariables;
+            this.environmentVariables = savedVariables;
+
+        // Carrega histórico de requisições salvo
+        const savedHistory = this.context.globalState.get<Array<{ method: string, url: string, headers: any, body: string }>>('requestHistory', []);
+            this.requestHistory = savedHistory;
 
         this.panel = vscode.window.createWebviewPanel(
             ApiPanel.viewType,
@@ -32,6 +36,11 @@ class ApiPanel {
 
         // Carrega o conteúdo HTML da interface
         this.panel.webview.html = this._getHtml();
+
+        this.panel.webview.postMessage({
+            command: 'updateHistory',
+            history: this.requestHistory
+        });
 
         this.panel.webview.onDidReceiveMessage(async (message: {
             command: string;
@@ -84,6 +93,24 @@ class ApiPanel {
                         command: 'loadEnvVariables',
                         variables: Object.entries(this.environmentVariables).map(([name, value]) => ({ name, value }))
                     });
+                    break;
+                case 'updateHistory':
+                    this.panel.webview.postMessage({
+                        command: 'updateHistory',
+                        history: this.requestHistory
+                    });
+                    break;
+                case 'clearHistory':
+                        this.requestHistory = [];
+                        this.context.globalState.update('requestHistory', this.requestHistory);
+                        this.panel.webview.postMessage({ command: 'updateHistory', history: this.requestHistory });
+                    break;
+                case 'deleteHistoryItem':
+                        if (message.index !== undefined) {
+                            this.requestHistory.splice(message.index, 1); 
+                            this.context.globalState.update('requestHistory', this.requestHistory); 
+                            this.panel.webview.postMessage({ command: 'updateHistory', history: this.requestHistory });
+                        }
                     break;
             }
         });
@@ -216,6 +243,7 @@ class ApiPanel {
 
     saveRequestToHistory(method: string, url: string, headers: any, body: string) {
         this.requestHistory.push({ method, url, headers, body });
+        this.context.globalState.update('requestHistory', this.requestHistory);
         this.panel.webview.postMessage({ command: 'updateHistory', history: this.requestHistory });
     }
 

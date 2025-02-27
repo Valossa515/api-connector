@@ -5,6 +5,10 @@ Todas as mudanças notáveis nesta extensão serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [0.1.5] - 2025-02-27
+### Adicionado
+- Carregamento automatico de historico e eclusão de historico de requisição.
+
 ## [0.1.4] - 2025-02-27
 ### Adicionado
 - Notificações para avisar o usuário ao clicar nos botões

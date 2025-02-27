@@ -19,7 +19,7 @@ h2 {
 }
 
 .request-section, .response-section, .auth-section, .env-section {
-    flex: 1;
+    flex: 1 1 300px;
     background: #fff;
     padding: 20px;
     border-radius: 8px;
@@ -205,26 +205,64 @@ pre {
 
 .history-section {
     margin-top: 20px;
-    width: 100%; /* Ocupa toda a largura */
+    padding: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background-color: #fff;
+    flex: 1 1 300px; 
+    max-width: 100%;
 }
 
-.history-section ul {
+.history-section h3 {
+    margin-bottom: 10px;
+    font-size: 18px;
+    color: #333;
+}
+
+.clear-history-btn {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 3px;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.clear-history-btn:hover {
+    background-color: #ff1a1a;
+}
+
+#historyList {
     list-style-type: none;
     padding: 0;
     margin: 0;
 }
 
-.history-section li {
+#historyList li {
+    margin-bottom: 10px;
+    background-color: #f1f1f1;
     padding: 10px;
-    border-bottom: 1px solid #ddd;
-    cursor: pointer;
-    background-color: #f9f9f9;
-    margin-bottom: 5px;
-    border-radius: 4px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.history-section li:hover {
+#historyList li:hover {
     background-color: #f1f1f1;
+}
+
+.delete-history-btn {
+    background-color: #ff4d4d;
+    color: white;
+    border: none;
+    padding: 3px 8px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.delete-history-btn:hover {
+    background-color: #ff1a1a;
 }
 
 .env-variable {

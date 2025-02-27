@@ -194,5 +194,9 @@ function showNotification(message, type = "success") {
     }, 5000);
   }
 
+function clearHistory() {
+    vscode.postMessage({ command: 'clearHistory' });
+}
+
 
 vscode.postMessage({ command: 'loadEnvVariables' });

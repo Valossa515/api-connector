@@ -299,12 +299,12 @@ class ApiPanel {
 
     // Carrega o conteúdo HTML da interface
     private _getHtml(): string {
-        const htmlPath = path.join(this.context.extensionPath, 'src', 'index.html');
+        const htmlPath = path.join(this.context.extensionPath, 'src', 'webview', 'index.html');
         const cssPath = this.panel.webview.asWebviewUri(
-            vscode.Uri.file(path.join(this.context.extensionPath, 'src', 'styles.css'))
+            vscode.Uri.file(path.join(this.context.extensionPath, 'src', 'webview', 'styles.css'))
         ).toString();
         const jsPath = this.panel.webview.asWebviewUri(
-            vscode.Uri.file(path.join(this.context.extensionPath, 'src', 'script.js'))
+            vscode.Uri.file(path.join(this.context.extensionPath, 'src', 'webview', 'script.js'))
         ).toString();
 
         let htmlContent = fs.readFileSync(htmlPath, 'utf8');
@@ -312,7 +312,6 @@ class ApiPanel {
 
         return htmlContent;
     }
-
 }
 
 function activate(context: vscode.ExtensionContext) {

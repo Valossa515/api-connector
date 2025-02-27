@@ -3,7 +3,7 @@
   "displayName": "API Connector",
   "publisher": "valossa515",
   "description": "Extension to connect to API very simple",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "engines": {
     "vscode": "^1.97.0"
   },
@@ -57,8 +57,8 @@
   },
   "files": [
     "logo.png",
-    "out",
+    "out/**/*",
     "README.md",
-    "src/webview"
+    "src/**/*"
   ]
 }

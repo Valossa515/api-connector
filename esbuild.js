@@ -1,12 +1,14 @@
 const esbuild = require("esbuild");
-
+const path = require("path"); // Adicione esta linha para importar o módulo path
 const production = process.argv.includes('--production');
 const watch = process.argv.includes('--watch');
 const fs = require('fs-extra');
+
 /**
  * @type {import('esbuild').Plugin}
  */
 
+// Copiar arquivos da webview para o diretório de saída
 fs.copySync(path.join(__dirname, 'src', 'webview'), path.join(__dirname, 'out', 'src', 'webview'));
 
 const esbuildProblemMatcherPlugin = {

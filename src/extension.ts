@@ -25,7 +25,7 @@ class ApiPanel {
                 enableScripts: true,
                 retainContextWhenHidden: true,
                 localResourceRoots: [
-                    vscode.Uri.file(path.join(this.context.extensionPath, 'src'))
+                    vscode.Uri.file(path.join(this.context.extensionPath, 'dist'))
                 ]
             }
         );
@@ -298,14 +298,16 @@ class ApiPanel {
     }
 
     private _getHtml(): string {
-        const htmlPath = path.join(this.context.extensionPath, 'src', 'index.html');
-        const htmlContent = fs.readFileSync(htmlPath, 'utf8');
+        const htmlPath = vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'index.html');
+        console.log(htmlPath.fsPath);  // Verifique o caminho completo aqui
+    
+        const htmlContent = fs.readFileSync(htmlPath.fsPath, 'utf8');
     
         const cssUri = this.panel.webview.asWebviewUri(
-            vscode.Uri.file(path.join(this.context.extensionPath, 'src', 'styles.css'))
+            vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'styles.css')
         );
         const jsUri = this.panel.webview.asWebviewUri(
-            vscode.Uri.file(path.join(this.context.extensionPath, 'src', 'script.js'))
+            vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'script.js')
         );
     
         // Substituir as variáveis {{styles}} e {{script}} com as URLs corretas

@@ -312,6 +312,7 @@ class ApiPanel {
 
         return htmlContent;
     }
+
 }
 
 function activate(context: vscode.ExtensionContext) {

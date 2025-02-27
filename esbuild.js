@@ -2,10 +2,13 @@ const esbuild = require("esbuild");
 
 const production = process.argv.includes('--production');
 const watch = process.argv.includes('--watch');
-
+const fs = require('fs-extra');
 /**
  * @type {import('esbuild').Plugin}
  */
+
+fs.copySync(path.join(__dirname, 'src', 'webview'), path.join(__dirname, 'out', 'src', 'webview'));
+
 const esbuildProblemMatcherPlugin = {
 	name: 'esbuild-problem-matcher',
 

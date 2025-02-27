@@ -1,6 +1,4 @@
 const esbuild = require('esbuild');
-const path = require('path');
-const fs = require('fs-extra');
 
 const production = process.argv.includes('--production');
 const watch = process.argv.includes('--watch');
@@ -30,24 +28,11 @@ async function main() {
     sourcemap: !production,
     sourcesContent: false,
     platform: 'node',
-    outfile: 'out/extension.js', // Alterado para 'out/extension.js'
+    outfile: 'dist/extension.js',
     external: ['vscode'],
     logLevel: 'silent',
     plugins: [
       esbuildProblemMatcherPlugin,
-      {
-        name: 'copy-webview-files',
-        setup(build) {
-          build.onEnd(async () => {
-            console.log('Copiando arquivos da webview...');
-            fs.copySync(
-              path.join(__dirname, 'src', 'webview'),
-              path.join(__dirname, 'out', 'src', 'webview')
-            );
-            console.log('Arquivos da webview copiados com sucesso.');
-          });
-        },
-      },
     ],
   });
 

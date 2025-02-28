@@ -13,7 +13,7 @@
       <!-- Painel da Esquerda (Request Section) -->
       <div class="request-section">
         <div class="panel-header">
-          <span>Requisição</span>
+          <span>Requests</span>
           <button
             class="collapse-btn"
             onclick="toggleCollapse('request-section')"
@@ -22,7 +22,7 @@
           </button>
         </div>
         <div class="panel-content">
-          <label for="method">Método:</label>
+          <label for="method">Method:</label>
           <select id="method">
             <option value="GET">GET</option>
             <option value="POST">POST</option>
@@ -32,50 +32,48 @@
             <option value="OPTIONS">OPTIONS</option>
           </select>
 
-          <label for="url">URL da API:</label>
+          <label for="url">API URL:</label>
           <div class="request-input-wrapper">
               <div class="request-highlight" id="urlHighlight"></div>
-              <input id="url" class="request-input" type="text" placeholder="Digite a URL da API" oninput="highlightVariables('url')" />
+              <input id="url" class="request-input" type="text" placeholder="Type the URL API" oninput="highlightVariables('url')" />
           </div>
 
-          <label for="params">Parâmetros (ex: param1=value1&amp;param2=value2):</label>
+          <label for="params">Parameters (ex: param1=value1&amp;param2=value2):</label>
           <div class="request-input-wrapper">
               <div class="request-highlight" id="paramsHighlight"></div>
-              <input id="params" class="request-input" type="text" placeholder="Digite os parâmetros" oninput="highlightVariables('params')" />
+              <input id="params" class="request-input" type="text" placeholder="Type the params" oninput="highlightVariables('params')" />
           </div>
 
-          <label for="body">Corpo da requisição (JSON):</label>
+          <label for="body">Request Body (JSON):</label>
           <div class="request-input-wrapper">
               <div class="request-highlight" id="bodyHighlight"></div>
-              <textarea id="body" class="request-input" placeholder="Corpo da requisição (JSON)" oninput="highlightVariables('body')"></textarea>
+              <textarea id="body" class="request-input" placeholder="Request Body (JSON)" oninput="highlightVariables('body')"></textarea>
           </div>
           
           <div class="header-inputs" id="headerInputs">
             <label for="header-name-1"
-              >Cabeçalho (Chave) (Opcional caso use a sessão
-              Autenticação):</label
+              >Header (Key) (Optional case using the Authentication Session):</label
             >
             <input
               id="header-name-1"
               type="text"
-              placeholder="Digite o nome do cabeçalho"
+              placeholder="Type the header name"
             />
             <label for="header-value-1"
-              >Cabeçalho (Valor) (Opcional caso use a sessão
-              Autenticação):</label
+              >Header (Value) (Optional case using the Authentication Session):</label
             >
             <input
               id="header-value-1"
               type="text"
-              placeholder="Digite o valor do cabeçalho"
+              placeholder="Type the header value"
             />
           </div>
 
           <button class="add-header-btn" onclick="addHeader()">
-            Adicionar Cabeçalho
+            Add Header
           </button>
-          <button onclick="sendRequest()">Enviar</button>
-          <div id="loading" class="loading">Carregando...</div>
+          <button onclick="sendRequest()">Send</button>
+          <div id="loading" class="loading">Loading...</div>
           <div id="error" class="error"></div>
         </div>
       </div>
@@ -83,7 +81,7 @@
       <!-- Painel da Direita (Response Section) -->
       <div class="response-section">
         <div class="panel-header">
-          <span>Resposta</span>
+          <span>Response</span>
           <button
             class="collapse-btn"
             onclick="toggleCollapse('response-section')"
@@ -92,14 +90,14 @@
           </button>
         </div>
         <div class="panel-content">
-          <label for="response">Resposta:</label>
+          <label for="response">Response:</label>
           <pre id="response"></pre>
           <select id="exportFormat">
             <option value="json">JSON</option>
             <option value="xml">XML</option>
           </select>
           <button class="export-btn" onclick="exportResponse()">
-            Exportar Resposta
+            Export Response
           </button>
         </div>
       </div>
@@ -107,15 +105,15 @@
       <!-- Painel de Autenticação -->
       <div class="auth-section">
         <div class="panel-header">
-          <span>Autenticação</span>
+          <span>Authentication</span>
           <button class="collapse-btn" onclick="toggleCollapse('auth-section')">
             -
           </button>
         </div>
         <div class="panel-content">
-          <label for="authType">Tipo de Autenticação:</label>
+          <label for="authType">Authentication Type:</label>
           <select id="authType">
-            <option value="None">Nenhuma</option>
+            <option value="None">None</option>
             <option value="Bearer">Bearer Token</option>
             <option value="OAuth">OAuth</option>
             <option value="Basic">Basic Auth</option>
@@ -127,7 +125,7 @@
               <input
                 id="bearerToken"
                 type="text"
-                placeholder="Digite o token"
+                placeholder="Type the token"
               />
             </div>
             <div id="oauthFields" class="auth-fields">
@@ -135,39 +133,39 @@
               <input
                 id="clientId"
                 type="text"
-                placeholder="Digite o Client ID"
+                placeholder="Type the Client ID"
               />
               <label for="clientSecret">Client Secret:</label>
               <input
                 id="clientSecret"
                 type="text"
-                placeholder="Digite o Client Secret"
+                placeholder="Type the Client Secret"
               />
             </div>
             <div id="basicFields" class="auth-fields">
-              <label for="basicUser">Usuário:</label>
+              <label for="basicUser">User:</label>
               <input
                 id="basicUser"
                 type="text"
-                placeholder="Digite o usuário"
+                placeholder="Type the user"
               />
-              <label for="basicPassword">Senha:</label>
+              <label for="basicPassword">Password:</label>
               <input
                 id="basicPassword"
                 type="password"
-                placeholder="Digite a senha"
+                placeholder="Type the password"
               />
             </div>
           </div>
 
-          <button onclick="setAuth()">Aplicar Autenticação</button>
+          <button onclick="setAuth()">Apply Authentication</button>
         </div>
       </div>
 
       <!-- Painel de Variáveis de Ambiente -->
       <div class="env-section">
         <div class="panel-header">
-            <span>Variáveis de Ambiente</span>
+            <span>Environment Variables</span>
             <button class="collapse-btn" onclick="toggleCollapse('env-section')">-</button>
         </div>
         <div class="panel-content">
@@ -175,23 +173,23 @@
                 <div class="env-variable">
                     <span class="env-key">API_KEY</span>
                     <span class="env-value">123456</span>
-                    <button class="delete-env-btn" onclick="deleteEnvVariable(this)">Excluir</button>
+                    <button class="delete-env-btn" onclick="deleteEnvVariable(this)">Delete</button>
                 </div>
                 <div class="env-variable">
                     <span class="env-key">BASE_URL</span>
                     <span class="env-value">https://api.example.com</span>
-                    <button class="delete-env-btn" onclick="deleteEnvVariable(this)">Excluir</button>
+                    <button class="delete-env-btn" onclick="deleteEnvVariable(this)">Delete</button>
                 </div>
             </div>
-            <button onclick="addEnvVariable()">Adicionar Variável</button>
-            <button onclick="saveEnvVariables()">Salvar Variáveis</button>
+            <button onclick="addEnvVariable()">Add Variable</button>
+            <button onclick="saveEnvVariables()">Save Variable</button>
         </div>
     </div>
 
     <!-- Histórico de Requisições -->
     <div class="history-section">
-      <h3>Histórico de Requisições</h3>
-      <button onclick="clearHistory()" class="clear-history-btn">Limpar Histórico</button>
+      <h3>Request History</h3>
+      <button onclick="clearHistory()" class="clear-history-btn">Clear history</button>
       <ul id="historyList"></ul>
   </div>
     <script src="{{script}}"></script>

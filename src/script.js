@@ -6,13 +6,13 @@ function addHeader() {
     const headerInputs = document.getElementById('headerInputs');
     const headerDiv = document.createElement('div');
     headerDiv.innerHTML = `
-        <label for="header-name-${headerCount}">Cabeçalho (Chave):</label>
-        <input id="header-name-${headerCount}" type="text" placeholder="Digite o nome do cabeçalho" />
+        <label for="header-name-${headerCount}">Cabeçalho (Key):</label>
+        <input id="header-name-${headerCount}" type="text" placeholder="Type the header name" />
         <label for="header-value-${headerCount}">Cabeçalho (Valor):</label>
-        <input id="header-value-${headerCount}" type="text" placeholder="Digite o valor do cabeçalho" />
+        <input id="header-value-${headerCount}" type="text" placeholder="Type the header value" />
     `;
     headerInputs.appendChild(headerDiv);
-    showNotification("Cabeçalho adicionado com sucesso!", "success");
+    showNotification("Header added successfully!", "success");
 }
 
 function sendRequest() {
@@ -22,7 +22,7 @@ function sendRequest() {
     const body = document.getElementById('body').value;
 
     if (!url) {
-        document.getElementById('error').textContent = 'URL da API é obrigatória.';
+        document.getElementById('error').textContent = 'URL is required!';
         return;
     }
 
@@ -45,14 +45,14 @@ function sendRequest() {
         headers,
         params
     });
-    showNotification("Requisição enviada!", "success");
+    showNotification("Request sent!", "success");
 }
 
 function exportResponse() {
     const response = document.getElementById('response').textContent;
     const format = document.getElementById('exportFormat').value;
     vscode.postMessage({ command: 'exportResponse', data: response, format });
-    showNotification("Resposta exportada!", "success");
+    showNotification("Response exported!", "success");
 }
 
 function loadRequest(index) {
@@ -71,7 +71,7 @@ function setAuth() {
         clientId,
         clientSecret
     });
-    showNotification("Autenticação aplicada com sucesso!", "success");
+    showNotification("Authentication applied successfully!", "success");
 }
 
 function addEnvVariable(name = '', value = '') {
@@ -83,19 +83,19 @@ function addEnvVariable(name = '', value = '') {
     div.style.marginBottom = '5px';
 
     div.innerHTML = `
-        <input class="env-key" type="text" value="${name}" placeholder="Nome da variável" style="width: 40%;" />
-        <input class="env-value" type="text" value="${value}" placeholder="Valor da variável" style="width: 50%;" />
-        <button class="delete-env-btn" onclick="deleteEnvVariable(this)">Excluir</button>
+        <input class="env-key" type="text" value="${name}" placeholder="Variable name" style="width: 40%;" />
+        <input class="env-value" type="text" value="${value}" placeholder="variable value" style="width: 50%;" />
+        <button class="delete-env-btn" onclick="deleteEnvVariable(this)">Delete</button>
     `;
     envVariables.appendChild(div);
-    showNotification("Variável de ambiente adicionada!", "success");
+    showNotification("Environment Variable added!", "success");
 }
 
 function deleteEnvVariable(button) {
     const envVariableDiv = button.parentElement;
     envVariableDiv.remove();
     saveEnvVariables();
-    showNotification("Variável de ambiente removida!", "success");
+    showNotification("Environment Variable removed!", "success");
 }
 
 
@@ -117,7 +117,7 @@ function saveEnvVariables() {
         }
     });
     vscode.postMessage({ command: 'saveEnvVariables', variables: envVariables });
-    showNotification("Variáveis de ambiente salvas com sucesso!", "success");
+    showNotification("Environment Variable saved successfully!", "success");
 }
 
 window.addEventListener('message', event => {

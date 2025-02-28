@@ -1,4 +1,3 @@
-/* Estilos gerais */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -27,13 +26,13 @@ body.theme-dark {
 }
 
 .theme-dark .env-key {
-    color: #4CAF50; /* Verde para as chaves no tema escuro */
-    background-color: #1e1e1e; /* Fundo escuro para destacar */
+    color: #4CAF50;
+    background-color: #1e1e1e;
 }
 
 .theme-dark .env-value {
-    color: #e0e0e0; /* Cor clara para os valores no tema escuro */
-    background-color: #2d2d2d; /* Fundo escuro para destacar */
+    color: #e0e0e0;
+    background-color: #2d2d2d;
 }
 
 .theme-dark #historyList li {
@@ -147,10 +146,14 @@ h2 {
     font-size: 18px;
     cursor: pointer;
     color: #333;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
 }
 
 .collapse-btn:hover {
-    color: #4CAF50;
+    background-color: #4CAF50;
+    color: white;
 }
 
 .panel-content {
@@ -257,13 +260,8 @@ pre {
     color: #e0e0e0;
 }
 
-.theme-dark .request-section, .theme-dark .response-section, .theme-dark .auth-section, .theme-dark .env-section {
+.theme-dark pre .request-section, .theme-dark .response-section, .theme-dark .auth-section, .theme-dark .env-section {
     background: #2d2d2d;
-    color: #e0e0e0;
-}
-
-.theme-dark pre {
-    background-color: #1e1e1e;
     color: #e0e0e0;
 }
 
@@ -274,27 +272,30 @@ pre {
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     min-width: 300px;
-    margin-top: 0; /* Removendo a margem superior que estava empurrando a seção para baixo */
+    margin-top: 0;
 }
 
 .history-section .panel-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    cursor: pointer;
 }
 
-.history-section .panel-header span {
-    font-weight: bold;
-    font-size: 16px;
+.history-section .panel-header .collapse-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #333;
+    padding: 5px 10px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
 }
 
-.history-section .panel-content {
-    display: block;
-}
-
-.history-section .panel-content.collapsed {
-    display: none;
+.history-section .panel-header .collapse-btn:hover {
+    background-color: #4CAF50;
+    color: white;
 }
 
 #historyList {
@@ -332,25 +333,11 @@ pre {
 }
 
 .history-section .panel-content {
-    display: block; /* Mostra o conteúdo por padrão */
+    display: block;
 }
 
 .history-section .panel-content.collapsed {
-    display: none; /* Esconde o conteúdo quando recolhido */
-}
-
-.history-section .panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-}
-
-.history-section .collapse-btn {
-    background: none;
-    border: none;
-    font-size: 16px;
-    cursor: pointer;
+    display: none;
 }
 
 .env-variable {
@@ -366,18 +353,18 @@ pre {
 
 .env-key {
     font-weight: bold;
-    color: #4CAF50; /* Verde para as chaves */
-    background-color: #e8f5e9; /* Fundo claro para destacar */
+    color: #4CAF50;
+    background-color: #e8f5e9;
     padding: 5px 10px;
     border-radius: 4px;
 }
 
 .env-value {
-    color: #333; /* Cor padrão para os valores */
-    background-color: #f1f1f1; /* Fundo claro para destacar */
+    color: #333;
+    background-color: #f1f1f1;
     padding: 5px 10px;
     border-radius: 4px;
-    flex: 1; /* Faz o valor ocupar o espaço restante */
+    flex: 1;
 }
 
 .delete-env-btn {
@@ -406,10 +393,12 @@ pre {
     opacity: 0;
     transition: opacity 0.5s ease;
     z-index: 1000;
-  }
-  #notification.show {
+}
+
+#notification.show {
     opacity: 1;
-  }
-  #notification.error {
+}
+
+#notification.error {
     background: #f44336;
-  }
+}

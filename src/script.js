@@ -133,10 +133,10 @@ window.addEventListener('message', event => {
         const body = document.body;
         if (message.theme === 'dark') {
             body.classList.add('theme-dark');
-            document.getElementById('theme-toggle').textContent = '☀️ Tema Claro';
+            document.getElementById('theme-toggle').textContent = '☀️ Light Theme';
         } else {
             body.classList.remove('theme-dark');
-            document.getElementById('theme-toggle').textContent = '🌙 Tema Escuro';
+            document.getElementById('theme-toggle').textContent = '🌙 Dark Theme';
         }
     }
     if (message.command === 'response') {

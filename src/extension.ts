@@ -13,11 +13,9 @@ class ApiPanel {
     private environmentVariables: Record<string, string> = {};
     private currentTheme: 'light' | 'dark' = 'light';
     constructor(private readonly context: vscode.ExtensionContext) {
-        // Carrega variáveis de ambiente salvas
         const savedVariables = this.context.globalState.get<Record<string, string>>('environmentVariables', {});
             this.environmentVariables = savedVariables;
 
-        // Carrega histórico de requisições salvo
         const savedHistory = this.context.globalState.get<Array<{ method: string, url: string, headers: any, body: string }>>('requestHistory', []);
             this.requestHistory = savedHistory;
 
@@ -41,7 +39,6 @@ class ApiPanel {
             theme: this.currentTheme
         });
 
-        // Carrega o conteúdo HTML da interface
         this.panel.webview.html = this._getHtml();
 
         this.panel.webview.postMessage({
@@ -95,7 +92,6 @@ class ApiPanel {
                     }
                     break;
                 case 'loadEnvVariables':
-                    // Envia as variáveis salvas para a Webview
                     this.panel.webview.postMessage({
                         command: 'loadEnvVariables',
                         variables: Object.entries(this.environmentVariables).map(([name, value]) => ({ name, value }))
@@ -142,7 +138,6 @@ class ApiPanel {
         ApiPanel.currentPanel = new ApiPanel(context);
     }
 
-    // Substitui variáveis de ambiente no URL, corpo e cabeçalhos
     private replaceEnvVariables(input: string): string {
         if (!input) {
             return input;
@@ -156,10 +151,8 @@ class ApiPanel {
             return;
         }
 
-        // Substitui variáveis de ambiente no URL
         const fullUrl = this.replaceEnvVariables(url);
 
-        // Valida a URL após a substituição
         if (!this.isValidUrl(fullUrl)) {
             this.panel.webview.postMessage({ command: 'error', message: 'invalid URL.' });
             return;
@@ -176,7 +169,6 @@ class ApiPanel {
         }
 
         try {
-            // Substitui variáveis de ambiente no corpo e cabeçalhos
             const fullBody = this.replaceEnvVariables(body);
             const fullHeaders = Object.keys(headers).reduce((acc, key) => {
                 acc[key] = this.replaceEnvVariables(headers[key]);
@@ -213,7 +205,6 @@ class ApiPanel {
         }
     }
 
-    // Salva variáveis de ambiente
     private saveEnvironmentVariables(variables: Array<{ name: string, value: string }>) {
         this.environmentVariables = {};
         variables.forEach(variable => {
@@ -341,7 +332,7 @@ class ApiPanel {
 
     private _getHtml(): string {
         const htmlPath = vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'index.html');
-        console.log(htmlPath.fsPath);  // Verifique o caminho completo aqui
+        console.log(htmlPath.fsPath);
     
         const htmlContent = fs.readFileSync(htmlPath.fsPath, 'utf8');
     
@@ -352,7 +343,6 @@ class ApiPanel {
             vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'script.js')
         );
     
-        // Substituir as variáveis {{styles}} e {{script}} com as URLs corretas
         let finalHtmlContent = htmlContent.replace('{{styles}}', cssUri.toString())
             .replace('{{script}}', jsUri.toString());
     

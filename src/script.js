@@ -198,5 +198,8 @@ function clearHistory() {
     vscode.postMessage({ command: 'clearHistory' });
 }
 
+function openNewInstance(){
+    vscode.postMessage({ command: 'openNewInstance' });
+}
 
 vscode.postMessage({ command: 'loadEnvVariables' });

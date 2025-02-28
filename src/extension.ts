@@ -112,6 +112,9 @@ class ApiPanel {
                             this.panel.webview.postMessage({ command: 'updateHistory', history: this.requestHistory });
                         }
                     break;
+                case 'openNewInstance':
+                    ApiPanel.show(this.context);
+                    break;
             }
         });
 
@@ -121,11 +124,7 @@ class ApiPanel {
     }
 
     static show(context: vscode.ExtensionContext) {
-        if (ApiPanel.currentPanel) {
-            ApiPanel.currentPanel.panel.reveal(vscode.ViewColumn.One);
-        } else {
-            ApiPanel.currentPanel = new ApiPanel(context);
-        }
+        ApiPanel.currentPanel = new ApiPanel(context);
     }
 
     // Substitui variáveis de ambiente no URL, corpo e cabeçalhos
@@ -138,7 +137,7 @@ class ApiPanel {
 
     async fetchApiResponse(method: string, url: string, body: string, headers: any, params: string) {
         if (!url) {
-            this.panel.webview.postMessage({ command: 'error', message: 'URL não pode estar vazia.' });
+            this.panel.webview.postMessage({ command: 'error', message: 'URL must not be empty.' });
             return;
         }
 
@@ -147,17 +146,17 @@ class ApiPanel {
 
         // Valida a URL após a substituição
         if (!this.isValidUrl(fullUrl)) {
-            this.panel.webview.postMessage({ command: 'error', message: 'URL inválida.' });
+            this.panel.webview.postMessage({ command: 'error', message: 'invalid URL.' });
             return;
         }
 
         if (body && !this.isValidJson(body)) {
-            this.panel.webview.postMessage({ command: 'error', message: 'Corpo da requisição não é um JSON válido.' });
+            this.panel.webview.postMessage({ command: 'error', message: 'Request body is not a valid JSON.' });
             return;
         }
 
         if (!this.validateHeaders(headers)) {
-            this.panel.webview.postMessage({ command: 'error', message: 'Cabeçalhos inválidos.' });
+            this.panel.webview.postMessage({ command: 'error', message: 'invalid headers.' });
             return;
         }
 
@@ -262,7 +261,7 @@ class ApiPanel {
         } else if (format === 'xml') {
             content = this.convertJsonToXml(data);
         } else {
-            vscode.window.showErrorMessage('Formato de exportação não suportado.');
+            vscode.window.showErrorMessage('exporting format not supported.');
             return;
         }
 
@@ -276,9 +275,9 @@ class ApiPanel {
         if (fileUri) {
             try {
                 await vscode.workspace.fs.writeFile(fileUri, Buffer.from(content, 'utf8'));
-                vscode.window.showInformationMessage(`Arquivo salvo em: ${fileUri.fsPath}`);
+                vscode.window.showInformationMessage(`File saved in: ${fileUri.fsPath}`);
             } catch (error) {
-                vscode.window.showErrorMessage(`Erro ao salvar o arquivo: ${(error as any).message}`);
+                vscode.window.showErrorMessage(`Error saving file: ${(error as any).message}`);
             }
         }
     }

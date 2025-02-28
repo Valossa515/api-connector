@@ -129,6 +129,16 @@ function saveEnvVariables() {
 
 window.addEventListener('message', event => {
     const message = event.data;
+    if (message.command === 'updateTheme') {
+        const body = document.body;
+        if (message.theme === 'dark') {
+            body.classList.add('theme-dark');
+            document.getElementById('theme-toggle').textContent = '☀️ Tema Claro';
+        } else {
+            body.classList.remove('theme-dark');
+            document.getElementById('theme-toggle').textContent = '🌙 Tema Escuro';
+        }
+    }
     if (message.command === 'response') {
         document.getElementById('loading').style.display = 'none';
         const responseWithStatus = {
@@ -213,5 +223,13 @@ function clearHistory() {
 function openNewInstance(){
     vscode.postMessage({ command: 'openNewInstance' });
 }
+
+function toggleTheme() {
+    vscode.postMessage({
+        command: 'toggleTheme'
+    });
+}
+
+document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
 
 vscode.postMessage({ command: 'loadEnvVariables' });

@@ -10,8 +10,8 @@ class ApiPanel {
     panel: vscode.WebviewPanel;
     private requestHistory: Array<{ method: string, url: string, headers: any, body: string }> = [];
     private authHeaders: any = {};
-    private environmentVariables: Record<string, string> = {}; // Armazena variáveis de ambiente
-
+    private environmentVariables: Record<string, string> = {};
+    private currentTheme: 'light' | 'dark' = 'light';
     constructor(private readonly context: vscode.ExtensionContext) {
         // Carrega variáveis de ambiente salvas
         const savedVariables = this.context.globalState.get<Record<string, string>>('environmentVariables', {});
@@ -20,6 +20,8 @@ class ApiPanel {
         // Carrega histórico de requisições salvo
         const savedHistory = this.context.globalState.get<Array<{ method: string, url: string, headers: any, body: string }>>('requestHistory', []);
             this.requestHistory = savedHistory;
+
+        this.currentTheme = this.context.globalState.get<string>('currentTheme', 'light') as 'light' | 'dark';
 
         this.panel = vscode.window.createWebviewPanel(
             ApiPanel.viewType,
@@ -33,6 +35,11 @@ class ApiPanel {
                 ]
             }
         );
+
+        this.panel.webview.postMessage({
+            command: 'updateTheme',
+            theme: this.currentTheme
+        });
 
         // Carrega o conteúdo HTML da interface
         this.panel.webview.html = this._getHtml();
@@ -114,6 +121,14 @@ class ApiPanel {
                     break;
                 case 'openNewInstance':
                     ApiPanel.show(this.context);
+                    break;
+                case 'toggleTheme':
+                        this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
+                        this.context.globalState.update('currentTheme', this.currentTheme);
+                        this.panel.webview.postMessage({
+                            command: 'updateTheme',
+                            theme: this.currentTheme
+                        });
                     break;
             }
         });

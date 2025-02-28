@@ -7,6 +7,54 @@ body {
     color: #333;
 }
 
+body.theme-dark {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+}
+
+.theme-dark .request-section,
+.theme-dark .response-section,
+.theme-dark .auth-section,
+.theme-dark .env-section,
+.theme-dark .history-section {
+    background: #2d2d2d;
+    color: #e0e0e0;
+}
+
+.theme-dark pre {
+    background-color: #1e1e1e;
+    color: #e0e0e0;
+}
+
+.theme-dark .env-key {
+    color: #4CAF50; /* Verde para as chaves no tema escuro */
+    background-color: #1e1e1e; /* Fundo escuro para destacar */
+}
+
+.theme-dark .env-value {
+    color: #e0e0e0; /* Cor clara para os valores no tema escuro */
+    background-color: #2d2d2d; /* Fundo escuro para destacar */
+}
+
+.theme-dark #historyList li {
+    background-color: #2d2d2d;
+    color: #e0e0e0;
+    border-bottom: 1px solid #444;
+}
+
+.theme-dark #historyList li:hover {
+    background-color: #3d3d3d;
+}
+
+.theme-dark .delete-history-btn {
+    background-color: #ff4d4d;
+    color: white;
+}
+
+.theme-dark .delete-history-btn:hover {
+    background-color: #ff1a1a;
+}
+
 h2 {
     color: #4CAF50;
     margin-bottom: 20px;
@@ -220,21 +268,34 @@ pre {
 }
 
 .history-section {
-    margin-top: 20px;
-    padding: 15px;
-    border: 1px solid #ccc;
+    flex: 1 1 300px;
+    background: #fff;
+    padding: 20px;
     border-radius: 8px;
-    background-color: #fff;
-    flex: 1 1 300px; 
-    max-width: 100%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-width: 300px;
+    margin-top: 0; /* Removendo a margem superior que estava empurrando a seção para baixo */
 }
 
-.history-section h3 {
-    margin-bottom: 10px;
-    font-size: 18px;
-    color: #333;
+.history-section .panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
 }
 
+.history-section .panel-header span {
+    font-weight: bold;
+    font-size: 16px;
+}
+
+.history-section .panel-content {
+    display: block;
+}
+
+.history-section .panel-content.collapsed {
+    display: none;
+}
 
 #historyList {
     list-style-type: none;

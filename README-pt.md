@@ -13,6 +13,7 @@ API Connector é uma ferramenta para o VSCode que lhe permite testar endpoints. 
 - 🔥 Criação de variáveis de ambiente personalizadas
 - 🔥 Painéis recolhiveis.
 - 🔥 Botão para abrir nova instancia.
+- 🔥 Temas claro e escuro.
 
 ## 📥 Instalação
 

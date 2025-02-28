@@ -107,7 +107,7 @@ h2 {
     background: transparent;
     color: transparent;
     caret-color: black;
-    padding: 8px;
+    padding: 10px 12px;
     font-size: 16px;
     box-sizing: border-box;
     position: relative;
@@ -171,17 +171,24 @@ label {
 }
 
 input, select, textarea {
-    width: 100%;
+    width: calc(100% - 10px);
     padding: 10px;
     margin-bottom: 15px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 14px;
+    box-sizing: border-box;
+}
+
+input {
+    overflow: visible;
 }
 
 textarea {
     height: 100px;
     resize: vertical;
+    box-sizing: border-box;
+    padding: 10px;
 }
 
 button {
@@ -381,6 +388,17 @@ pre {
 
 .delete-env-btn:hover {
     background-color: #d32f2f;
+}
+
+.auth-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 20px;
+}
+
+.auth-section input {
+    max-width: 100%;
 }
 
 #notification {

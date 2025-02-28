@@ -5,9 +5,16 @@ All notable changes to this extension will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.1.8] - 2025-02-28
+### Added
+- Adding new styles for Request History Panel.
+
+### Fixed
+- Exporting function json with pretty format.
+
 ## [0.1.7] - 2025-02-28
 ### Added
-- Adding new instance button
+- Adding new instance button.
 
 ## [0.1.6] - 2025-02-27
 ### Added
@@ -19,8 +26,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [0.1.4] - 2025-02-27
 ### Added
-- Notifications to alert the user when clicking buttons
-- Collapsible panels
+- Notifications to alert the user when clicking buttons.
+- Collapsible panels.
 - New CSS styles for environment variables and coloring of brackets `{}` to highlight environment variables.
 
 ### Fixed

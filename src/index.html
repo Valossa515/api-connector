@@ -189,9 +189,14 @@
 
     <!-- Histórico de Requisições -->
     <div class="history-section">
-      <h3>Request History</h3>
-      <button onclick="clearHistory()" class="clear-history-btn">Clear history</button>
-      <ul id="historyList"></ul>
+      <div class="panel-header">
+          <span>Request History</span>
+          <button class="collapse-btn" onclick="toggleCollapse('history-section')">-</button>
+      </div>
+      <div class="panel-content">
+          <button onclick="clearHistory()" class="clear-history-btn">Clear history</button>
+          <ul id="historyList"></ul>
+      </div>
   </div>
     <script src="{{script}}"></script>
   </body>

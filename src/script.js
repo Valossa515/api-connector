@@ -49,9 +49,16 @@ function sendRequest() {
 }
 
 function exportResponse() {
-    const response = document.getElementById('response').textContent;
+    const responseElement = document.getElementById('response');
+    const responseContent = responseElement.textContent;
     const format = document.getElementById('exportFormat').value;
-    vscode.postMessage({ command: 'exportResponse', data: response, format });
+    
+    vscode.postMessage({ 
+        command: 'exportResponse', 
+        data: responseContent, 
+        format 
+    });
+    
     showNotification("Response exported!", "success");
 }
 
@@ -124,10 +131,15 @@ window.addEventListener('message', event => {
     const message = event.data;
     if (message.command === 'response') {
         document.getElementById('loading').style.display = 'none';
-        document.getElementById('response').textContent = `Status: ${message.status}\n${JSON.stringify(message.data, null, 2)}`;
+        const responseWithStatus = {
+            statusCode: message.status,
+            ...message.data
+        };
+        const responseElement = document.getElementById('response');
+        responseElement.textContent = JSON.stringify(responseWithStatus, null, 2);
     } else if (message.command === 'error') {
         document.getElementById('loading').style.display = 'none';
-        document.getElementById('error').textContent = 'Erro: ' + message.message;
+        document.getElementById('error').textContent = 'Error: ' + message.message;
     } else if (message.command === 'updateHistory') {
         const historyList = document.getElementById('historyList');
         historyList.innerHTML = '';

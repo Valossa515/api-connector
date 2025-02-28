@@ -255,23 +255,23 @@ class ApiPanel {
 
     async exportResponse(data: any, format: string) {
         let content: string;
-
+    
         if (format === 'json') {
-            content = JSON.stringify(data, null, 2);
+            content = data;
         } else if (format === 'xml') {
             content = this.convertJsonToXml(data);
         } else {
-            vscode.window.showErrorMessage('exporting format not supported.');
+            vscode.window.showErrorMessage('Exporting format not supported.');
             return;
         }
-
+    
         const fileUri = await vscode.window.showSaveDialog({
             filters: {
                 'Files': [format]
             },
-            saveLabel: 'Salvar'
+            saveLabel: 'Save'
         });
-
+    
         if (fileUri) {
             try {
                 await vscode.workspace.fs.writeFile(fileUri, Buffer.from(content, 'utf8'));

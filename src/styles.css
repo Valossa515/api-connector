@@ -1,9 +1,10 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
-    padding: 20px;
-    background-color: #f9f9f9;
+    padding: 10px;
+    background-color: #f8f9fa;
     color: #333;
+    font-size: 14px;
 }
 
 body.theme-dark {
@@ -11,142 +12,56 @@ body.theme-dark {
     color: #e0e0e0;
 }
 
-.theme-dark .request-section,
-.theme-dark .response-section,
-.theme-dark .auth-section,
-.theme-dark .env-section,
-.theme-dark .history-section {
-    background: #2d2d2d;
-    color: #e0e0e0;
-}
-
-.theme-dark pre {
-    background-color: #1e1e1e;
-    color: #e0e0e0;
-}
-
-.theme-dark .env-key {
-    color: #4CAF50;
-    background-color: #1e1e1e;
-}
-
-.theme-dark .env-value {
-    color: #e0e0e0;
-    background-color: #2d2d2d;
-}
-
-.theme-dark #historyList li {
-    background-color: #2d2d2d;
-    color: #e0e0e0;
-    border-bottom: 1px solid #444;
-}
-
-.theme-dark #historyList li:hover {
-    background-color: #3d3d3d;
-}
-
-.theme-dark .delete-history-btn {
-    background-color: #ff4d4d;
-    color: white;
-}
-
-.theme-dark .delete-history-btn:hover {
-    background-color: #ff1a1a;
-}
-
 h2 {
     color: #4CAF50;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
+    font-size: 16px;
 }
 
 .container {
     display: flex;
-    gap: 20px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
-.request-section, .response-section, .auth-section, .env-section {
-    flex: 1 1 300px;
+.request-section, .response-section, .auth-section, .env-section, .history-section {
+    flex: 1 1 250px;
     background: #fff;
-    padding: 20px;
+    padding: 10px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    min-width: 300px;
+    min-width: 250px;
+    margin-bottom: 10px;
 }
 
-.request-input-wrapper {
-    position: relative;
-    width: 100%;
-    margin-bottom: 15px;
-    overflow: hidden;
-}
-
-.request-highlight {
-    width: 100%;
-    min-height: 40px;
-    padding: 8px;
-    font-size: 16px;
-    white-space: pre-wrap;
-    word-wrap: break-word;
-    color: black;
-    background-color: white;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box;
-    position: absolute;
-    top: 0;
-    left: 0;
-    pointer-events: none;
-    overflow: hidden;
-    line-height: 1.5;
-}
-
-.request-input {
-    width: 100%;
-    min-height: 40px;
-    background: transparent;
-    color: transparent;
-    caret-color: black;
-    padding: 10px 12px;
-    font-size: 16px;
-    box-sizing: border-box;
-    position: relative;
-    z-index: 1;
-    resize: vertical;
-    border: none;
-    line-height: 1.5;
-    overflow: hidden;
-}
-
-.request-highlight .brackets {
-    color: blue;
-    font-weight: bold;
-}
-
-.request-highlight .variable {
-    color: red;
-    font-weight: bold;
+.theme-dark .request-section, 
+.theme-dark .response-section, 
+.theme-dark .auth-section, 
+.theme-dark .env-section, 
+.theme-dark .history-section {
+    background: #2d2d2d;
+    color: #e0e0e0;
 }
 
 .panel-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
 }
 
 .panel-header span {
-    font-weight: bold;
-    font-size: 16px;
+    font-weight: 600;
+    font-size: 14px;
 }
 
 .collapse-btn {
     background: none;
     border: none;
-    font-size: 18px;
+    font-size: 16px;
     cursor: pointer;
     color: #333;
-    padding: 5px 10px;
+    padding: 3px 8px;
     border-radius: 4px;
     transition: background-color 0.3s ease;
 }
@@ -166,40 +81,36 @@ h2 {
 
 label {
     display: block;
-    font-weight: bold;
-    margin-bottom: 8px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    font-size: 12px;
 }
 
 input, select, textarea {
     width: calc(100% - 10px);
-    padding: 10px;
-    margin-bottom: 15px;
+    padding: 6px;
+    margin-bottom: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    font-size: 14px;
+    font-size: 12px;
     box-sizing: border-box;
-}
-
-input {
-    overflow: visible;
 }
 
 textarea {
-    height: 100px;
+    height: 80px;
     resize: vertical;
-    box-sizing: border-box;
-    padding: 10px;
 }
 
 button {
     background-color: #4CAF50;
     color: white;
-    padding: 10px 15px;
+    padding: 6px 10px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 14px;
-    margin-right: 10px;
+    font-size: 12px;
+    margin-right: 8px;
+    transition: background-color 0.3s ease;
 }
 
 button:hover {
@@ -208,6 +119,7 @@ button:hover {
 
 .add-header-btn {
     background-color: #008CBA;
+    margin-right: 10px;
 }
 
 .add-header-btn:hover {
@@ -216,6 +128,7 @@ button:hover {
 
 .new-instance-btn { 
     background-color: #007acc;
+    margin-left: 10px;
 }
 
 .new-instance-btn:hover {
@@ -232,7 +145,7 @@ button:hover {
 
 .clear-history-btn {
     background-color: #ff4d4d;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     display: block;
 }
 
@@ -244,117 +157,33 @@ pre {
     white-space: pre-wrap;
     word-wrap: break-word;
     background-color: #f4f4f4;
-    padding: 10px;
-    border-radius: 5px;
+    padding: 6px;
+    border-radius: 4px;
     border: 1px solid #ddd;
-    max-height: 300px;
+    max-height: 150px;
     overflow-y: auto;
+    font-size: 12px;
 }
 
 .loading {
     display: none;
     color: #4CAF50;
     font-weight: bold;
-    margin-bottom: 15px;
+    margin-bottom: 8px;
 }
 
 .error {
     color: #f44336;
     font-weight: bold;
-    margin-bottom: 15px;
-}
-
-.theme-dark {
-    background-color: #1e1e1e;
-    color: #e0e0e0;
-}
-
-.theme-dark pre .request-section, .theme-dark .response-section, .theme-dark .auth-section, .theme-dark .env-section {
-    background: #2d2d2d;
-    color: #e0e0e0;
-}
-
-.history-section {
-    flex: 1 1 300px;
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    min-width: 300px;
-    margin-top: 0;
-}
-
-.history-section .panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-}
-
-.history-section .panel-header .collapse-btn {
-    background: none;
-    border: none;
-    font-size: 18px;
-    cursor: pointer;
-    color: #333;
-    padding: 5px 10px;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
-}
-
-.history-section .panel-header .collapse-btn:hover {
-    background-color: #4CAF50;
-    color: white;
-}
-
-#historyList {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-}
-
-#historyList li {
-    margin-bottom: 10px;
-    background-color: #f1f1f1;
-    padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    border-bottom: 1px solid #ddd;
-    cursor: pointer;
-}
-
-#historyList li:hover {
-    background-color: #f1f1f1;
-}
-
-.delete-history-btn {
-    background-color: #ff4d4d;
-    color: white;
-    border: none;
-    padding: 3px 8px;
-    border-radius: 3px;
-    cursor: pointer;
-    font-size: 12px;
-}
-
-.delete-history-btn:hover {
-    background-color: #ff1a1a;
-}
-
-.history-section .panel-content {
-    display: block;
-}
-
-.history-section .panel-content.collapsed {
-    display: none;
+    margin-bottom: 8px;
 }
 
 .env-variable {
     display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
+    gap: 6px;
+    margin-bottom: 6px;
     align-items: center;
-    padding: 10px;
+    padding: 6px;
     background-color: #f9f9f9;
     border-radius: 4px;
     border: 1px solid #ddd;
@@ -364,55 +193,47 @@ pre {
     font-weight: bold;
     color: #4CAF50;
     background-color: #e8f5e9;
-    padding: 5px 10px;
+    padding: 3px 6px;
     border-radius: 4px;
+    font-size: 12px;
 }
 
 .env-value {
     color: #333;
     background-color: #f1f1f1;
-    padding: 5px 10px;
+    padding: 3px 6px;
     border-radius: 4px;
     flex: 1;
+    font-size: 12px;
 }
 
 .delete-env-btn {
     background-color: #f44336;
     color: white;
-    padding: 5px 10px;
+    padding: 3px 6px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 12px;
 }
 
 .delete-env-btn:hover {
     background-color: #d32f2f;
 }
 
-.auth-section {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 20px;
-}
-
-.auth-section input {
-    max-width: 100%;
-}
-
 #notification {
     position: fixed;
-    top: 20px;
-    right: 20px;
+    top: 10px;
+    right: 10px;
     background: #4CAF50;
     color: #fff;
-    padding: 10px 20px;
+    padding: 6px 12px;
     border-radius: 4px;
     box-shadow: 0 0 5px rgba(0,0,0,0.2);
     opacity: 0;
     transition: opacity 0.5s ease;
     z-index: 1000;
+    font-size: 12px;
 }
 
 #notification.show {

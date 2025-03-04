@@ -12,82 +12,49 @@
     <h2>API Connector</h2>
     <div class="container">
       <div class="request-section">
-        <div class="panel-header">
-          <span>Requests</span>
-          <button
-            class="collapse-btn"
-            onclick="toggleCollapse('request-section')"
-          >
-            -
-          </button>
-        </div>
-        <div class="panel-content">
-          <label for="method">Method:</label>
-          <select id="method">
-            <option value="GET">GET</option>
-            <option value="POST">POST</option>
-            <option value="PUT">PUT</option>
-            <option value="DELETE">DELETE</option>
-            <option value="PATCH">PATCH</option>
-            <option value="OPTIONS">OPTIONS</option>
-          </select>
-
-          <label for="url">API URL:</label>
-          <div class="request-input-wrapper">
-              <div class="request-highlight" id="urlHighlight"></div>
-              <input id="url" class="request-input" type="text" placeholder="Type the URL API" oninput="highlightVariables('url')" />
+          <div class="panel-header">
+              <span>Requests</span>
+              <button class="collapse-btn" onclick="toggleCollapse('request-section')">-</button>
           </div>
-
-          <label for="params">Parameters (ex: param1=value1&amp;param2=value2):</label>
-          <div class="request-input-wrapper">
-              <div class="request-highlight" id="paramsHighlight"></div>
-              <input id="params" class="request-input" type="text" placeholder="Type the params" oninput="highlightVariables('params')" />
+          <div class="panel-content">
+              <label for="method">Method:</label>
+              <select id="method">
+                  <option value="GET">GET</option>
+                  <option value="POST">POST</option>
+                  <option value="PUT">PUT</option>
+                  <option value="DELETE">DELETE</option>
+                  <option value="PATCH">PATCH</option>
+                  <option value="OPTIONS">OPTIONS</option>
+              </select>
+  
+              <label for="url">API URL:</label>
+              <input id="url" type="text" placeholder="Type the URL API" />
+  
+              <label for="params">Parameters:</label>
+              <input id="params" type="text" placeholder="Type the params" />
+  
+              <label for="body">Request Body (JSON):</label>
+              <textarea id="body" placeholder="Request Body (JSON)"></textarea>
+  
+              <div class="header-inputs" id="headerInputs">
+                  <label for="header-name-1">Header (Key) (Optional if you use Authorization session):</label>
+                  <input id="header-name-1" type="text" placeholder="Type the header name" />
+                  <label for="header-value-1">Header (Value) (Optional if you use Authorization session):</label>
+                  <input id="header-value-1" type="text" placeholder="Type the header value" />
+              </div>
+  
+              <button class="add-header-btn" onclick="addHeader()">Add Header</button>
+              <button onclick="sendRequest()">Send</button>
+              <button onclick="openNewInstance()" class="new-instance-btn">New Instance</button>
+              <div id="loading" class="loading">Loading...</div>
+              <div id="error" class="error"></div>
           </div>
-
-          <label for="body">Request Body (JSON):</label>
-          <div class="request-input-wrapper">
-              <div class="request-highlight" id="bodyHighlight"></div>
-              <textarea id="body" class="request-input" placeholder="Request Body (JSON)" oninput="highlightVariables('body')"></textarea>
-          </div>
-          
-          <div class="header-inputs" id="headerInputs">
-            <label for="header-name-1"
-              >Header (Key) (Optional case using the Authentication Session):</label
-            >
-            <input
-              id="header-name-1"
-              type="text"
-              placeholder="Type the header name"
-            />
-            <label for="header-value-1"
-              >Header (Value) (Optional case using the Authentication Session):</label
-            >
-            <input
-              id="header-value-1"
-              type="text"
-              placeholder="Type the header value"
-            />
-          </div>
-
-          <button class="add-header-btn" onclick="addHeader()">
-            Add Header
-          </button>
-          <button onclick="sendRequest()">Send</button>
-          <button onclick="openNewInstance()" class="new-instance-btn">New Instance</button>
-          <div id="loading" class="loading">Loading...</div>
-          <div id="error" class="error"></div>
-        </div>
       </div>
 
       <div class="response-section">
         <div class="panel-header">
           <span>Response</span>
-          <button
-            class="collapse-btn"
-            onclick="toggleCollapse('response-section')"
-          >
-            -
-          </button>
+          <button class="collapse-btn" onclick="toggleCollapse('response-section')">-</button>
         </div>
         <div class="panel-content">
           <label for="response">Response:</label>
@@ -96,18 +63,14 @@
             <option value="json">JSON</option>
             <option value="xml">XML</option>
           </select>
-          <button class="export-btn" onclick="exportResponse()">
-            Export Response
-          </button>
+          <button class="export-btn" onclick="exportResponse()">Export Response</button>
         </div>
       </div>
 
       <div class="auth-section">
         <div class="panel-header">
           <span>Authentication</span>
-          <button class="collapse-btn" onclick="toggleCollapse('auth-section')">
-            -
-          </button>
+          <button class="collapse-btn" onclick="toggleCollapse('auth-section')">-</button>
         </div>
         <div class="panel-content">
           <label for="authType">Authentication Type:</label>
@@ -121,39 +84,19 @@
           <div id="authFields">
             <div id="bearerFields" class="auth-fields">
               <label for="bearerToken">Token:</label>
-              <input
-                id="bearerToken"
-                type="text"
-                placeholder="Type the token"
-              />
+              <input id="bearerToken" type="text" placeholder="Type the token" />
             </div>
             <div id="oauthFields" class="auth-fields">
               <label for="clientId">Client ID:</label>
-              <input
-                id="clientId"
-                type="text"
-                placeholder="Type the Client ID"
-              />
+              <input id="clientId" type="text" placeholder="Type the Client ID" />
               <label for="clientSecret">Client Secret:</label>
-              <input
-                id="clientSecret"
-                type="text"
-                placeholder="Type the Client Secret"
-              />
+              <input id="clientSecret" type="text" placeholder="Type the Client Secret" />
             </div>
             <div id="basicFields" class="auth-fields">
               <label for="basicUser">User:</label>
-              <input
-                id="basicUser"
-                type="text"
-                placeholder="Type the user"
-              />
+              <input id="basicUser" type="text" placeholder="Type the user" />
               <label for="basicPassword">Password:</label>
-              <input
-                id="basicPassword"
-                type="password"
-                placeholder="Type the password"
-              />
+              <input id="basicPassword" type="password" placeholder="Type the password" />
             </div>
           </div>
 

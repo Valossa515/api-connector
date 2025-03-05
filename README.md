@@ -9,11 +9,12 @@ API Connector is a tool for VSCode that allows you to test endpoints. With it, y
 - 🔥 Add multiple headers
 - 🔥 Export API response
 - 🔥 Field to add request parameters
-- 🔥 Session for custom Authorization (Bearer, OAuth...)
+- 🔥 Section for custom Authorization (Bearer, OAuth...)
 - 🔥 Create custom environment variables
 - 🔥 Collapsible panels
 - 🔥 New Instance button
 - 🔥 Light and Dark Themes with autosave
+- 🔥 Request History with click action
 
 ## 📥 Installation
 

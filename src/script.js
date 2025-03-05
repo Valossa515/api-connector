@@ -158,11 +158,42 @@ window.addEventListener('message', event => {
             li.textContent = `${request.method} ${request.url}`;
             li.onclick = () => loadRequest(index);
             historyList.appendChild(li);
+            li.classList.add("history-item");
+
+            li.addEventListener('click', function () {
+                loadRequest(index);
+                document.querySelectorAll('.history-item').forEach(item => item.classList.remove('active'));
+                li.classList.add('active');
+            });
+
+            historyList.appendChild(li);
         });
     } else if (message.command === 'loadRequest') {
         document.getElementById('method').value = message.request.method;
         document.getElementById('url').value = message.request.url;
         document.getElementById('body').value = message.request.body;
+        document.getElementById('params').value = message.request.params;
+
+        const headerInputs = document.getElementById('headerInputs');
+        headerInputs.innerHTML = '';
+
+        let headerCount = 1;
+
+        for (const key in message.request.headers) {
+            if (message.request.headers.hasOwnProperty(key)) {
+                const headerDiv = document.createElement('div');
+                headerDiv.innerHTML = `
+                    <label for="header-name-${headerCount}">Header (Key):</label>
+                    <input id="header-name-${headerCount}" type="text" value="${key}" placeholder="Header Name" />
+                    <label for="header-value-${headerCount}">Header (Value):</label>
+                    <input id="header-value-${headerCount}" type="text" value="${message.request.headers[key]}" placeholder="Header Value" />
+
+                `;
+                headerInputs.appendChild(headerDiv);
+                headerCount++;
+            }
+        }
+        showNotification("Request loaded from history!", "success");
     } else if (message.command === 'loadEnvVariables') {
         loadEnvVariables(message.variables);
     }

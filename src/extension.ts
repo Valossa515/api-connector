@@ -8,7 +8,7 @@ class ApiPanel {
     static readonly viewType = 'apiConnectorPanel';
 
     panel: vscode.WebviewPanel;
-    private requestHistory: Array<{ method: string, url: string, headers: any, body: string }> = [];
+    private requestHistory: Array<{ method: string, url: string, headers: any, body: string, params: string }> = [];
     private authHeaders: any = {};
     private environmentVariables: Record<string, string> = {};
     private currentTheme: 'light' | 'dark' = 'light';
@@ -16,7 +16,7 @@ class ApiPanel {
         const savedVariables = this.context.globalState.get<Record<string, string>>('environmentVariables', {});
             this.environmentVariables = savedVariables;
 
-        const savedHistory = this.context.globalState.get<Array<{ method: string, url: string, headers: any, body: string }>>('requestHistory', []);
+        const savedHistory = this.context.globalState.get<Array<{ method: string, url: string, headers: any, body: string, params: string }>>('requestHistory', []);
             this.requestHistory = savedHistory;
 
         this.currentTheme = this.context.globalState.get<string>('currentTheme', 'light') as 'light' | 'dark';
@@ -199,7 +199,7 @@ class ApiPanel {
                 status: response.status
             });
 
-            this.saveRequestToHistory(method, fullUrl, mergedHeaders, fullBody);
+            this.saveRequestToHistory(method, fullUrl, mergedHeaders, fullBody, params);
         } catch (error: any) {
             this.panel.webview.postMessage({ command: 'error', message: error.message });
         }
@@ -246,18 +246,28 @@ class ApiPanel {
         return true;
     }
 
-    saveRequestToHistory(method: string, url: string, headers: any, body: string) {
-        this.requestHistory.push({ method, url, headers, body });
+    saveRequestToHistory(method: string, url: string, headers: any, body: string, params: string) {
+        this.requestHistory.push({ method, url, headers, body, params });
         this.context.globalState.update('requestHistory', this.requestHistory);
         this.panel.webview.postMessage({ command: 'updateHistory', history: this.requestHistory });
     }
+    
 
     loadRequestFromHistory(index: number) {
         const request = this.requestHistory[index];
         if (request) {
-            this.panel.webview.postMessage({ command: 'loadRequest', request });
+            this.panel.webview.postMessage({ 
+                command: 'loadRequest', 
+                request: {
+                    method: request.method,
+                    url: request.url,
+                    body: request.body,
+                    headers: request.headers,
+                    params: request.params
+                }
+            });
         }
-    }
+    }    
 
     async exportResponse(data: any, format: string) {
         let content: string;

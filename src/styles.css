@@ -31,12 +31,12 @@ h2 {
 }
 
 .request-section, .response-section, .auth-section, .env-section, .history-section {
-    flex: 1 1 250px;
+    flex: 1 1 300px;
     background: #fff;
     padding: 10px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    min-width: 250px;
+    max-width: 600px;
     margin-bottom: 10px;
 }
 
@@ -291,4 +291,45 @@ pre {
 
 #notification.error {
     background: #f44336;
+}
+
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .request-section, .response-section, .auth-section, .env-section, .history-section {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    input, select, textarea {
+        width: 100%;
+    }
+
+    button {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    h2 {
+        font-size: 14px;
+        text-align: center;
+    }
+
+    .panel-header {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .collapse-btn {
+        margin-top: 5px;
+    }
+
+    .theme-toggle-btn {
+        font-size: 12px;
+    }
 }

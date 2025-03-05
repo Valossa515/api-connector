@@ -270,6 +270,38 @@ pre {
     background-color: #d32f2f;
 }
 
+.editable-input {
+    width: calc(100% - 10px);
+    padding: 6px;
+    margin-bottom: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 12px;
+    box-sizing: border-box;
+    background-color: white;
+    color: #333;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    min-height: 20px;
+    outline: none;
+}
+
+.editable-input[placeholder]:empty::before {
+    content: attr(placeholder);
+    color: #999;
+    font-style: italic;
+}
+
+.variable {
+    color: #007acc;
+    font-weight: bold;
+}
+
+.brackets {
+    color: #4CAF50;
+    font-weight: bold;
+}
+
 #notification {
     position: fixed;
     top: 10px;

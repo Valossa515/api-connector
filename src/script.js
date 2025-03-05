@@ -17,9 +17,9 @@ function addHeader() {
 
 function sendRequest() {
     const method = document.getElementById('method').value;
-    const url = document.getElementById('url').value;
-    const params = document.getElementById('params').value;
-    const body = document.getElementById('body').value;
+    const url = document.getElementById('url').textContent;
+    const params = document.getElementById('params').textContent;
+    const body = document.getElementById('body').textContent;
 
     if (!url) {
         document.getElementById('error').textContent = 'URL is required!';
@@ -104,7 +104,6 @@ function deleteEnvVariable(button) {
     saveEnvVariables();
     showNotification("Environment Variable removed!", "success");
 }
-
 
 function loadEnvVariables(variables) {
     const envVariables = document.getElementById('envVariables');
@@ -214,21 +213,23 @@ function toggleCollapse(sectionId) {
 
 function highlightVariables(fieldId) {
     const inputField = document.getElementById(fieldId);
-    const highlightField = document.getElementById(fieldId + 'Highlight');
-    let text = inputField.value;
+    const selection = window.getSelection();
+    const cursorPosition = selection.anchorOffset;
+
+    let text = inputField.textContent;
 
     text = text.replace(/\{\{(.*?)\}\}/g, (match, varName) => {
         return `<span class="brackets">{{</span><span class="variable">${varName}</span><span class="brackets">}}</span>`;
     });
 
-    highlightField.innerHTML = text || "&nbsp;";
+    inputField.innerHTML = text || "&nbsp;";
 
-    highlightField.style.height = inputField.scrollHeight + "px";
-
-    highlightField.scrollTop = inputField.scrollTop;
-    highlightField.scrollLeft = inputField.scrollLeft;
+    const range = document.createRange();
+    range.setStart(inputField.childNodes[0], cursorPosition);
+    range.collapse(true);
+    selection.removeAllRanges();
+    selection.addRange(range);
 }
-
 document.getElementById('url').addEventListener('input', () => highlightVariables('url'));
 document.getElementById('params').addEventListener('input', () => highlightVariables('params'));
 document.getElementById('body').addEventListener('input', () => highlightVariables('body'));

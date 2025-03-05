@@ -142,7 +142,8 @@ class ApiPanel {
         if (!input) {
             return input;
         }
-        return input.replace(/\{\{(.*?)\}\}/g, (match, p1) => this.environmentVariables[p1] || match);
+        const result = input.replace(/\{\{(.*?)\}\}/g, (match, p1) => this.environmentVariables[p1] || match);
+        return result;
     }
 
     async fetchApiResponse(method: string, url: string, body: string, headers: any, params: string) {
@@ -150,41 +151,42 @@ class ApiPanel {
             this.panel.webview.postMessage({ command: 'error', message: 'URL must not be empty.' });
             return;
         }
-
+    
         const fullUrl = this.replaceEnvVariables(url);
-
+    
         if (!this.isValidUrl(fullUrl)) {
             this.panel.webview.postMessage({ command: 'error', message: 'invalid URL.' });
             return;
         }
-
+    
         if (body && !this.isValidJson(body)) {
             this.panel.webview.postMessage({ command: 'error', message: 'Request body is not a valid JSON.' });
             return;
         }
-
+    
         if (!this.validateHeaders(headers)) {
             this.panel.webview.postMessage({ command: 'error', message: 'invalid headers.' });
             return;
         }
-
+    
         try {
             const fullBody = this.replaceEnvVariables(body);
             const fullHeaders = Object.keys(headers).reduce((acc, key) => {
                 acc[key] = this.replaceEnvVariables(headers[key]);
                 return acc;
             }, {} as Record<string, string>);
-
+    
             let finalUrl = fullUrl;
             if (params) {
-                finalUrl += '?' + params;
+                const fullParams = this.replaceEnvVariables(params);
+                finalUrl += '?' + fullParams;
             }
-
+    
             const mergedHeaders = {
                 ...this.authHeaders,
                 ...fullHeaders
             };
-
+    
             const options = {
                 method: method,
                 url: finalUrl,
@@ -192,13 +194,13 @@ class ApiPanel {
                 headers: mergedHeaders
             };
             const response = await axios(options);
-
+    
             this.panel.webview.postMessage({
                 command: 'response',
                 data: response.data,
                 status: response.status
             });
-
+    
             this.saveRequestToHistory(method, fullUrl, mergedHeaders, fullBody, params);
         } catch (error: any) {
             this.panel.webview.postMessage({ command: 'error', message: error.message });

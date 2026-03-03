@@ -1,17 +1,41 @@
 const vscode = acquireVsCodeApi();
 let headerCount = 1;
 
+function createHeaderRow(count, nameValue = '', valueValue = '') {
+    const headerDiv = document.createElement('div');
+
+    const nameLabel = document.createElement('label');
+    nameLabel.setAttribute('for', `header-name-${count}`);
+    nameLabel.textContent = 'Header (Key):';
+
+    const nameInput = document.createElement('input');
+    nameInput.id = `header-name-${count}`;
+    nameInput.type = 'text';
+    nameInput.placeholder = 'Type the header name';
+    nameInput.value = nameValue;
+
+    const valueLabel = document.createElement('label');
+    valueLabel.setAttribute('for', `header-value-${count}`);
+    valueLabel.textContent = 'Header (Value):';
+
+    const valueInput = document.createElement('input');
+    valueInput.id = `header-value-${count}`;
+    valueInput.type = 'text';
+    valueInput.placeholder = 'Type the header value';
+    valueInput.value = valueValue;
+
+    headerDiv.appendChild(nameLabel);
+    headerDiv.appendChild(nameInput);
+    headerDiv.appendChild(valueLabel);
+    headerDiv.appendChild(valueInput);
+
+    return headerDiv;
+}
+
 function addHeader() {
     headerCount++;
     const headerInputs = document.getElementById('headerInputs');
-    const headerDiv = document.createElement('div');
-    headerDiv.innerHTML = `
-        <label for="header-name-${headerCount}">Cabeçalho (Key):</label>
-        <input id="header-name-${headerCount}" type="text" placeholder="Type the header name" />
-        <label for="header-value-${headerCount}">Cabeçalho (Valor):</label>
-        <input id="header-value-${headerCount}" type="text" placeholder="Type the header value" />
-    `;
-    headerInputs.appendChild(headerDiv);
+    headerInputs.appendChild(createHeaderRow(headerCount));
     showNotification("Header added successfully!", "success");
 }
 
@@ -89,11 +113,30 @@ function addEnvVariable(name = '', value = '') {
     div.style.gap = '10px';
     div.style.marginBottom = '5px';
 
-    div.innerHTML = `
-        <input class="env-key" type="text" value="${name}" placeholder="Variable name" style="width: 40%;" />
-        <input class="env-value" type="text" value="${value}" placeholder="variable value" style="width: 50%;" />
-        <button class="delete-env-btn" onclick="deleteEnvVariable(this)">Delete</button>
-    `;
+    const keyInput = document.createElement('input');
+    keyInput.className = 'env-key';
+    keyInput.type = 'text';
+    keyInput.value = name;
+    keyInput.placeholder = 'Variable name';
+    keyInput.style.width = '40%';
+
+    const valueInput = document.createElement('input');
+    valueInput.className = 'env-value';
+    valueInput.type = 'text';
+    valueInput.value = value;
+    valueInput.placeholder = 'Variable value';
+    valueInput.style.width = '50%';
+
+    const deleteBtn = document.createElement('button');
+    deleteBtn.className = 'delete-env-btn';
+    deleteBtn.textContent = 'Delete';
+    deleteBtn.addEventListener('click', function () {
+        deleteEnvVariable(this);
+    });
+
+    div.appendChild(keyInput);
+    div.appendChild(valueInput);
+    div.appendChild(deleteBtn);
     envVariables.appendChild(div);
     showNotification("Environment Variable added!", "success");
 }
@@ -155,43 +198,33 @@ window.addEventListener('message', event => {
         message.history.forEach((request, index) => {
             const li = document.createElement('li');
             li.textContent = `${request.method} ${request.url}`;
-            li.onclick = () => loadRequest(index);
-            historyList.appendChild(li);
             li.classList.add("history-item");
-
             li.addEventListener('click', function () {
                 loadRequest(index);
                 document.querySelectorAll('.history-item').forEach(item => item.classList.remove('active'));
                 li.classList.add('active');
             });
-
             historyList.appendChild(li);
         });
     } else if (message.command === 'loadRequest') {
         document.getElementById('method').value = message.request.method;
-        document.getElementById('url').value = message.request.url;
-        document.getElementById('body').value = message.request.body;
-        document.getElementById('params').value = message.request.params;
+        document.getElementById('url').textContent = message.request.url || '';
+        document.getElementById('body').value = message.request.body || '';
+        document.getElementById('params').textContent = message.request.params || '';
 
         const headerInputs = document.getElementById('headerInputs');
         headerInputs.innerHTML = '';
 
-        let headerCount = 1;
+        headerCount = 1;
 
         for (const key in message.request.headers) {
-            if (message.request.headers.hasOwnProperty(key)) {
-                const headerDiv = document.createElement('div');
-                headerDiv.innerHTML = `
-                    <label for="header-name-${headerCount}">Header (Key):</label>
-                    <input id="header-name-${headerCount}" type="text" value="${key}" placeholder="Header Name" />
-                    <label for="header-value-${headerCount}">Header (Value):</label>
-                    <input id="header-value-${headerCount}" type="text" value="${message.request.headers[key]}" placeholder="Header Value" />
-
-                `;
-                headerInputs.appendChild(headerDiv);
+            if (Object.prototype.hasOwnProperty.call(message.request.headers, key)) {
+                headerInputs.appendChild(createHeaderRow(headerCount, key, message.request.headers[key]));
                 headerCount++;
             }
         }
+        highlightVariables('url');
+        highlightVariables('params');
         showNotification("Request loaded from history!", "success");
     } else if (message.command === 'loadEnvVariables') {
         loadEnvVariables(message.variables);
@@ -213,22 +246,35 @@ function toggleCollapse(sectionId) {
 
 function highlightVariables(fieldId) {
     const inputField = document.getElementById(fieldId);
+    if (!inputField) { return; }
+
     const selection = window.getSelection();
-    const cursorPosition = selection.anchorOffset;
+    let cursorPosition = 0;
+    if (selection && selection.rangeCount > 0 && inputField.contains(selection.anchorNode)) {
+        cursorPosition = selection.anchorOffset;
+    }
 
-    let text = inputField.textContent;
+    const text = inputField.textContent || '';
 
-    text = text.replace(/\{\{(.*?)\}\}/g, (match, varName) => {
+    const highlighted = text.replace(/\{\{(.*?)\}\}/g, (_match, varName) => {
         return `<span class="brackets">{{</span><span class="variable">${varName}</span><span class="brackets">}}</span>`;
     });
 
-    inputField.innerHTML = text || "&nbsp;";
+    inputField.innerHTML = highlighted || "&nbsp;";
 
-    const range = document.createRange();
-    range.setStart(inputField.childNodes[0], cursorPosition);
-    range.collapse(true);
-    selection.removeAllRanges();
-    selection.addRange(range);
+    try {
+        if (inputField.childNodes.length > 0) {
+            const range = document.createRange();
+            const firstNode = inputField.childNodes[0];
+            const maxOffset = firstNode.textContent ? firstNode.textContent.length : 0;
+            range.setStart(firstNode, Math.min(cursorPosition, maxOffset));
+            range.collapse(true);
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    } catch (_e) {
+        // Cursor restoration failed - not critical, user can click to reposition
+    }
 }
 document.getElementById('url').addEventListener('input', () => highlightVariables('url'));
 document.getElementById('params').addEventListener('input', () => highlightVariables('params'));

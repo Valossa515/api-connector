@@ -1,23 +1,51 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
+
+interface RequestRecord {
+    method: string;
+    url: string;
+    headers: Record<string, string>;
+    body: string;
+    params: string;
+}
+
+interface WebviewMessage {
+    command: string;
+    method?: string;
+    url?: string;
+    body?: string;
+    headers?: Record<string, string>;
+    params?: string;
+    data?: string;
+    format?: string;
+    authType?: string;
+    token?: string;
+    clientId?: string;
+    clientSecret?: string;
+    index?: number;
+    variables?: Array<{ name: string; value: string }>;
+}
+
+const MAX_HISTORY_SIZE = 50;
+const REQUEST_TIMEOUT_MS = 30000;
 
 class ApiPanel {
     private static currentPanel: ApiPanel | undefined = undefined;
     static readonly viewType = 'apiConnectorPanel';
 
     panel: vscode.WebviewPanel;
-    private requestHistory: Array<{ method: string, url: string, headers: any, body: string, params: string }> = [];
-    private authHeaders: any = {};
+    private requestHistory: RequestRecord[] = [];
+    private authHeaders: Record<string, string> = {};
     private environmentVariables: Record<string, string> = {};
     private currentTheme: 'light' | 'dark' = 'light';
     constructor(private readonly context: vscode.ExtensionContext) {
         const savedVariables = this.context.globalState.get<Record<string, string>>('environmentVariables', {});
             this.environmentVariables = savedVariables;
 
-        const savedHistory = this.context.globalState.get<Array<{ method: string, url: string, headers: any, body: string, params: string }>>('requestHistory', []);
-            this.requestHistory = savedHistory;
+        const savedHistory = this.context.globalState.get<RequestRecord[]>('requestHistory', []);
+        this.requestHistory = savedHistory;
 
         this.currentTheme = this.context.globalState.get<string>('currentTheme', 'light') as 'light' | 'dark';
 
@@ -46,22 +74,7 @@ class ApiPanel {
             history: this.requestHistory
         });
 
-        this.panel.webview.onDidReceiveMessage(async (message: {
-            command: string;
-            method?: string;
-            url?: string;
-            body?: string;
-            headers?: any;
-            params?: string;
-            data?: any;
-            format?: string;
-            authType?: string;
-            token?: string;
-            clientId?: string;
-            clientSecret?: string;
-            index?: number;
-            variables?: Array<{ name: string, value: string }>;
-        }) => {
+        this.panel.webview.onDidReceiveMessage(async (message: WebviewMessage) => {
             switch (message.command) {
                 case 'fetchApi':
                     if (message.method && message.url && message.headers && message.params !== undefined) {
@@ -146,64 +159,80 @@ class ApiPanel {
         return result;
     }
 
-    async fetchApiResponse(method: string, url: string, body: string, headers: any, params: string) {
+    async fetchApiResponse(method: string, url: string, body: string, headers: Record<string, string>, params: string) {
         if (!url) {
             this.panel.webview.postMessage({ command: 'error', message: 'URL must not be empty.' });
             return;
         }
-    
+
         const fullUrl = this.replaceEnvVariables(url);
-    
+
         if (!this.isValidUrl(fullUrl)) {
-            this.panel.webview.postMessage({ command: 'error', message: 'invalid URL.' });
+            this.panel.webview.postMessage({ command: 'error', message: 'Invalid URL.' });
             return;
         }
-    
+
         if (body && !this.isValidJson(body)) {
             this.panel.webview.postMessage({ command: 'error', message: 'Request body is not a valid JSON.' });
             return;
         }
-    
+
         if (!this.validateHeaders(headers)) {
-            this.panel.webview.postMessage({ command: 'error', message: 'invalid headers.' });
+            this.panel.webview.postMessage({ command: 'error', message: 'Invalid headers.' });
             return;
         }
-    
+
         try {
             const fullBody = this.replaceEnvVariables(body);
             const fullHeaders = Object.keys(headers).reduce((acc, key) => {
                 acc[key] = this.replaceEnvVariables(headers[key]);
                 return acc;
             }, {} as Record<string, string>);
-    
+
             let finalUrl = fullUrl;
             if (params) {
                 const fullParams = this.replaceEnvVariables(params);
                 finalUrl += '?' + fullParams;
             }
-    
-            const mergedHeaders = {
+
+            const mergedHeaders: Record<string, string> = {
                 ...this.authHeaders,
                 ...fullHeaders
             };
-    
+
             const options = {
                 method: method,
                 url: finalUrl,
                 data: fullBody ? JSON.parse(fullBody) : undefined,
-                headers: mergedHeaders
+                headers: mergedHeaders,
+                timeout: REQUEST_TIMEOUT_MS
             };
             const response = await axios(options);
-    
+
             this.panel.webview.postMessage({
                 command: 'response',
                 data: response.data,
                 status: response.status
             });
-    
+
             this.saveRequestToHistory(method, fullUrl, mergedHeaders, fullBody, params);
-        } catch (error: any) {
-            this.panel.webview.postMessage({ command: 'error', message: error.message });
+        } catch (error: unknown) {
+            if (error instanceof AxiosError) {
+                if (error.code === 'ECONNABORTED') {
+                    this.panel.webview.postMessage({ command: 'error', message: `Request timed out after ${REQUEST_TIMEOUT_MS / 1000}s.` });
+                } else if (error.response) {
+                    this.panel.webview.postMessage({
+                        command: 'error',
+                        message: `HTTP ${error.response.status}: ${error.response.statusText}`
+                    });
+                } else if (error.request) {
+                    this.panel.webview.postMessage({ command: 'error', message: 'No response received. Check your network connection.' });
+                } else {
+                    this.panel.webview.postMessage({ command: 'error', message: error.message });
+                }
+            } else {
+                this.panel.webview.postMessage({ command: 'error', message: 'An unexpected error occurred.' });
+            }
         }
     }
 
@@ -239,7 +268,7 @@ class ApiPanel {
         return regex.test(header);
     }
 
-    validateHeaders(headers: any): boolean {
+    validateHeaders(headers: Record<string, string>): boolean {
         for (const key in headers) {
             if (!this.isValidHeader(key)) {
                 return false;
@@ -248,8 +277,11 @@ class ApiPanel {
         return true;
     }
 
-    saveRequestToHistory(method: string, url: string, headers: any, body: string, params: string) {
+    saveRequestToHistory(method: string, url: string, headers: Record<string, string>, body: string, params: string) {
         this.requestHistory.push({ method, url, headers, body, params });
+        if (this.requestHistory.length > MAX_HISTORY_SIZE) {
+            this.requestHistory = this.requestHistory.slice(-MAX_HISTORY_SIZE);
+        }
         this.context.globalState.update('requestHistory', this.requestHistory);
         this.panel.webview.postMessage({ command: 'updateHistory', history: this.requestHistory });
     }
@@ -271,13 +303,19 @@ class ApiPanel {
         }
     }    
 
-    async exportResponse(data: any, format: string) {
+    async exportResponse(data: string, format: string) {
         let content: string;
     
         if (format === 'json') {
             content = data;
         } else if (format === 'xml') {
-            content = this.convertJsonToXml(data);
+            try {
+                const parsed = JSON.parse(data) as Record<string, unknown>;
+                content = this.convertJsonToXml(parsed);
+            } catch {
+                vscode.window.showErrorMessage('Response is not valid JSON for XML conversion.');
+                return;
+            }
         } else {
             vscode.window.showErrorMessage('Exporting format not supported.');
             return;
@@ -295,18 +333,34 @@ class ApiPanel {
                 await vscode.workspace.fs.writeFile(fileUri, Buffer.from(content, 'utf8'));
                 vscode.window.showInformationMessage(`File saved in: ${fileUri.fsPath}`);
             } catch (error) {
-                vscode.window.showErrorMessage(`Error saving file: ${(error as any).message}`);
+                vscode.window.showErrorMessage(`Error saving file: ${error instanceof Error ? error.message : 'Unknown error'}`);
             }
         }
     }
 
-    convertJsonToXml(json: any): string {
-        let xml = '';
+    private escapeXml(value: string): string {
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&apos;');
+    }
+
+    convertJsonToXml(json: Record<string, unknown>): string {
+        let xml = '<root>';
         for (const key in json) {
-            if (json.hasOwnProperty(key)) {
-                xml += `<${key}>${json[key]}</${key}>`;
+            if (Object.prototype.hasOwnProperty.call(json, key)) {
+                const safeKey = this.escapeXml(key);
+                const value = json[key];
+                if (typeof value === 'object' && value !== null) {
+                    xml += `<${safeKey}>${this.convertJsonToXml(value as Record<string, unknown>)}</${safeKey}>`;
+                } else {
+                    xml += `<${safeKey}>${this.escapeXml(String(value))}</${safeKey}>`;
+                }
             }
         }
+        xml += '</root>';
         return xml;
     }
 
@@ -316,7 +370,7 @@ class ApiPanel {
         clientId: string = '',
         clientSecret: string = ''
     ) {
-        let headers = {};
+        let headers: Record<string, string> = {};
         switch (authType) {
             case 'Bearer':
                 headers = { Authorization: `Bearer ${token}` };
@@ -344,7 +398,6 @@ class ApiPanel {
 
     private _getHtml(): string {
         const htmlPath = vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'index.html');
-        console.log(htmlPath.fsPath);
     
         const htmlContent = fs.readFileSync(htmlPath.fsPath, 'utf8');
     

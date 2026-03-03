@@ -56,12 +56,5 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/Valossa515/api-connector.git"
-  },
-  "files": [
-    "logo.png",
-    "README.md",
-    "src/**/*",
-    "dist/**/*",
-    "assets/**/*"
-  ]
+  }
 }
